@@ -3,13 +3,13 @@
     class="cms-element-category-navigation-sidebar-filter sw-navbar navbar section"
   >
     <div class="sw-navbar navbar__main">
-      <SfButton
+      <SwButton
         class="sf-button--text navbar__filters-button"
         @click="isFilterSidebarOpen = true"
       >
         <SfIcon size="14px" icon="filter" style="margin-right: 10px;" />
         Filters
-      </SfButton>
+      </SwButton>
       <div class="navbar__sort desktop-only">
         <span class="navbar__label">Sort by:</span>
         <SfSelect v-model="sortBy" :size="sorting.length" class="sort-by">
@@ -30,36 +30,49 @@
       </div>
       <div class="navbar__view">
         <span class="navbar__view-label desktop-only">View</span>
-        <SfIcon
-          class="navbar__view-icon"
-          :color="isGridView ? '#1D1F22' : '#BEBFC4'"
-          icon="tiles"
-          size="10px"
-          role="button"
+        <SwButton
+          class="sf-button--pure"
           aria-label="Change to grid view"
-          :aria-pressed="isGridView"
-          @click="isGridView = true"
-        />
-        <SfIcon
-          class="navbar__view-icon"
-          :color="!isGridView ? '#1D1F22' : '#BEBFC4'"
-          icon="list"
-          size="10px"
-          role="button"
+          :aria-pressed="!isListView.toString()"
+          @click="switchToListView(false)"
+        >
+          <SfIcon
+            class="navbar__view-icon"
+            :color="!isListView ? '#1D1F22' : '#BEBFC4'"
+            icon="tiles"
+            size="12px"
+          />
+        </SwButton>
+        <SwButton
+          class="sf-button--pure"
           aria-label="Change to list view"
-          :aria-pressed="!isGridView"
-          @click="isGridView = false"
-        />
+          :aria-pressed="isListView.toString()"
+          @click="switchToListView(true)"
+        >
+          <SfIcon
+            class="navbar__view-icon"
+            :color="isListView ? '#1D1F22' : '#BEBFC4'"
+            icon="list"
+            size="12px"
+          />
+        </SwButton>
       </div>
       <SfSidebar
         title="Filters"
         :visible="isFilterSidebarOpen"
+        class="filters-sidebar"
         @close="isFilterSidebarOpen = false"
       >
         <div class="filters">
           <div v-for="filter in filters" :key="filter.name">
             <SfHeading class="filters__title" :level="4" :title="filter.name" />
-            <div v-if="filter && filter.options && filter.options.length" :class="{'filters__filter--color': filter.name && filter.name === 'color'}">
+            <div
+              v-if="filter && filter.options && filter.options.length"
+              :class="{
+                'filters__filter--color':
+                  filter.name && filter.name === 'color',
+              }"
+            >
               <SfFilter
                 v-for="option in filter.options"
                 :key="option.value"
@@ -73,7 +86,7 @@
                   )
                 "
                 class="filters__item"
-                :class="{'filters__item--color': option.color}"
+                :class="{ 'filters__item--color': option.color }"
                 @change="
                   toggleFilter({
                     type: 'equals',
@@ -87,13 +100,13 @@
         </div>
         <template #content-bottom>
           <div class="filters__buttons">
-            <SfButton class="sf-button--full-width" @click="submitFilters()"
-              >Done</SfButton
+            <SwButton class="sf-button--full-width" @click="submitFilters()"
+              >Done</SwButton
             >
-            <SfButton
+            <SwButton
               class="sf-button--full-width filters__button-clear"
               @click="clearAllFilters()"
-              >Clear all</SfButton
+              >Clear all</SwButton
             >
           </div>
         </template>
@@ -104,32 +117,31 @@
 
 <script>
 import {
-  SfButton,
   SfIcon,
   SfSelect,
   SfFilter,
   SfHeading,
   SfSidebar,
-  SfProductOption,
-} from '@storefront-ui/vue'
+} from "@storefront-ui/vue"
 import {
   useCategoryFilters,
   useProductListing,
-} from '@shopware-pwa/composables'
+  useUIState,
+} from "@shopware-pwa/composables"
+import { getSortingLabel } from "@shopware-pwa/default-theme/helpers"
+import SwButton from "@shopware-pwa/default-theme/components/atoms/SwButton"
 const { availableFilters, availableSorting } = useCategoryFilters()
-import { getSortingLabel } from '@shopware-pwa/default-theme/helpers'
 
 export default {
+  name: "CmsElementCategorySidebarFilter",
   components: {
-    SfButton,
+    SwButton,
     SfIcon,
     SfSelect,
     SfFilter,
     SfHeading,
     SfSidebar,
-    SfProductOption,
   },
-  name: 'CmsElementCategorySidebarFilter',
   props: {
     content: {
       type: Object,
@@ -147,6 +159,10 @@ export default {
       productsTotal,
     } = useProductListing()
 
+    const { isOpen: isListView, switchState: switchToListView } = useUIState(
+      "PRODUCT_LISTING_STATE"
+    )
+
     return {
       toggleFilter,
       changeSorting,
@@ -155,13 +171,14 @@ export default {
       selectedFilters,
       resetFilters,
       productsTotal,
+      isListView,
+      switchToListView,
     }
   },
   data() {
     return {
       isFilterSidebarOpen: false,
       sortBy: this.selectedSorting,
-      isGridView: true,
     }
   },
   computed: {
@@ -207,13 +224,13 @@ export default {
     },
     getSortLabel(sorting) {
       return getSortingLabel(sorting)
-    }
+    },
   },
 }
 </script>
 
 <style lang="scss" scoped>
-@import '../settings.scss';
+@import "../settings.scss";
 
 .navbar {
   position: relative;
@@ -342,12 +359,19 @@ export default {
     }
   }
   &__buttons {
-    margin: calc(var(--spacer-base) * 3) 0 0 0;
+    margin: var(--spacer-base) 0 calc(var(--spacer-base) * 3) 0;
+    @include for-desktop {
+      margin: var(--spacer-xl) 0 0 0;
+    }
   }
   &__button-clear {
     color: #a3a5ad;
     margin-top: 10px;
     background-color: var(--c-light);
   }
+}
+.filters-sidebar {
+  --sidebar-z-index: 4;
+  --overlay-z-index: 4;
 }
 </style>

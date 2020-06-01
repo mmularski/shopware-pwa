@@ -1,6 +1,6 @@
 {
   "name": "@shopware-pwa/cli",
-  "version": "0.1.0-alpha.9",
+  "version": "0.1.0",
   "description": "Shopware PWA CLI",
   "types": "build/types/types.d.ts",
   "bin": {
@@ -30,11 +30,12 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@shopware-pwa/shopware-6-client": "0.1.0-alpha.9",
+    "@shopware-pwa/shopware-6-client": "0.1.0",
     "gluegun": "^4.3.1",
     "lodash": "^4.17.15",
     "request": "^2.88.2",
     "snyk": "^1.316.1",
+    "universal-analytics": "^0.4.20",
     "unzipper": "^0.10.11"
   },
   "devDependencies": {

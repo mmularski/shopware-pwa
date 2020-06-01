@@ -1,6 +1,6 @@
 {
   "name": "shopware-pwa",
-  "version": "0.1.0-alpha.9",
+  "version": "0.1.0",
   "private": true,
   "workspaces": {
     "packages": [
@@ -11,7 +11,7 @@
     ]
   },
   "scripts": {
-    "start": "yarn && yarn build --types && node scripts/init.js",
+    "start": "yarn && yarn build --ci && node scripts/init.js",
     "dev": "node scripts/dev.js",
     "dev:client": "yarn dev shopware-6-client -format=esm-bundler",
     "dev:composables": "yarn dev composables -format=esm-bundler",

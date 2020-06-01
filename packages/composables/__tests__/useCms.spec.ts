@@ -13,7 +13,7 @@ import * as shopwareClient from "@shopware-pwa/shopware-6-client";
 jest.mock("@shopware-pwa/shopware-6-client");
 const mockedGetPage = shopwareClient as jest.Mocked<typeof shopwareClient>;
 
-describe("Shopware composables", () => {
+describe("Composables - useCms", () => {
   const statePage: Ref<Object | null> = ref(null);
   beforeEach(() => {
     // mock vuex store
@@ -29,7 +29,7 @@ describe("Shopware composables", () => {
   it("should have value", async () => {
     const { search, page } = useCms();
     const response: shopwareClient.PageResolverResult<any> = {
-      breadcrumb: [],
+      breadcrumb: {},
       cmsPage: { name: "super category", type: "product_list" },
       resourceIdentifier: "3f637f17cd9f4891a2d7625d19fb37c9",
       resourceType: "frontend.navigation.page",
@@ -80,10 +80,23 @@ describe("Shopware composables", () => {
     });
   });
 
+  it("should perform search default pagination limit if wrong value", async () => {
+    const { search, page } = useCms();
+    mockedGetPage.getPage.mockResolvedValueOnce({} as any);
+    expect(page.value).toEqual(null);
+    await search("", { pagination: "null" });
+    expect(mockedGetPage.getPage).toBeCalledWith("", {
+      configuration: {
+        associations: [{ associations: [{ name: "group" }], name: "options" }],
+      },
+      pagination: { limit: 10 },
+    });
+  });
+
   it("should return activeCategoryId if it's included within the page object", async () => {
     const { categoryId, search } = useCms();
     const response: shopwareClient.PageResolverResult<any> = {
-      breadcrumb: [],
+      breadcrumb: {},
       cmsPage: { name: "super category", type: "product_list" },
       resourceIdentifier: "3f637f17cd9f4891a2d7625d19fb37c9",
       resourceType: "frontend.navigation.page",
@@ -92,5 +105,33 @@ describe("Shopware composables", () => {
     expect(categoryId.value).toBeNull();
     await search();
     expect(categoryId.value).toEqual("3f637f17cd9f4891a2d7625d19fb37c9");
+  });
+
+  describe("computed", () => {
+    describe("getBreadcrumbsObject", () => {
+      it("should contain empty array when there aren't any available countries", async () => {
+        const { getBreadcrumbsObject, search } = useCms();
+        const response: shopwareClient.PageResolverResult<any> = {
+          breadcrumb: {
+            qwe: {
+              name: "Some Category",
+              path: "/some/category",
+            },
+          },
+          cmsPage: { name: "super category", type: "product_list" },
+          resourceIdentifier: "3f637f17cd9f4891a2d7625d19fb37c9",
+          resourceType: "frontend.navigation.page",
+        };
+        mockedGetPage.getPage.mockResolvedValueOnce(response);
+        expect(getBreadcrumbsObject.value).toEqual([]);
+        await search();
+        expect(getBreadcrumbsObject.value).toEqual({
+          qwe: {
+            name: "Some Category",
+            path: "/some/category",
+          },
+        });
+      });
+    });
   });
 });

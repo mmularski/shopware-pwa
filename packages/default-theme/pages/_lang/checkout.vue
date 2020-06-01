@@ -3,22 +3,22 @@
     <div class="checkout">
       <div class="checkout__main">
         <SfSteps :active="currentStep" @change="nextStep($event)">
-          <SfStep name="Personal Details">
+          <SfStep :name="$t('Personal Details')">
             <PersonalDetailsStep @proceed="nextStep()" />
           </SfStep>
-          <SfStep name="Shipping">
+          <SfStep :name="$t('Shipping')">
             <ShippingStep
               @retreat="nextStep(currentStep - 1)"
               @proceed="nextStep()"
             />
           </SfStep>
-          <SfStep name="Payment">
+          <SfStep :name="$t('Payment')">
             <PaymentStep
               @click:back="nextStep(currentStep - 1)"
               @proceed="nextStep()"
             />
           </SfStep>
-          <SfStep name="Review">
+          <SfStep :name="$t('Review')">
             <OrderReviewStep
               @click:back="nextStep(currentStep - 1)"
               @proceed="nextStep()"
@@ -45,22 +45,22 @@
   </div>
 </template>
 <script>
-import { SfSteps } from '@storefront-ui/vue'
-import SidebarOrderReview from '@shopware-pwa/default-theme/components/checkout/sidebar/SidebarOrderReview'
-import SidebarOrderSummary from '@shopware-pwa/default-theme/components/checkout/sidebar/SidebarOrderSummary'
-import PaymentStep from '@shopware-pwa/default-theme/components/checkout/steps/PaymentStep'
-import PersonalDetailsStep from '@shopware-pwa/default-theme/components/checkout/steps/PersonalDetailsStep'
-import ShippingStep from '@shopware-pwa/default-theme/components/checkout/steps/ShippingStep'
-import OrderReviewStep from '@shopware-pwa/default-theme/components/checkout/steps/OrderReviewStep'
-import { ref, computed, reactive } from '@vue/composition-api'
+import { SfSteps } from "@storefront-ui/vue"
+import SidebarOrderReview from "@shopware-pwa/default-theme/components/checkout/sidebar/SidebarOrderReview"
+import SidebarOrderSummary from "@shopware-pwa/default-theme/components/checkout/sidebar/SidebarOrderSummary"
+import PaymentStep from "@shopware-pwa/default-theme/components/checkout/steps/PaymentStep"
+import PersonalDetailsStep from "@shopware-pwa/default-theme/components/checkout/steps/PersonalDetailsStep"
+import ShippingStep from "@shopware-pwa/default-theme/components/checkout/steps/ShippingStep"
+import OrderReviewStep from "@shopware-pwa/default-theme/components/checkout/steps/OrderReviewStep"
+import { ref, computed, reactive } from "@vue/composition-api"
 import {
   CHECKOUT_STEPS,
   getStepByNumber,
-  useUICheckoutPage
-} from '@shopware-pwa/default-theme/logic/checkout'
+  useUICheckoutPage,
+} from "@shopware-pwa/default-theme/logic/checkout"
 
 export default {
-  name: 'CheckoutPage',
+  name: "CheckoutPage",
   components: {
     SfSteps,
     PersonalDetailsStep,
@@ -91,7 +91,7 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-@import '~@storefront-ui/vue/styles';
+@import "@/assets/scss/variables";
 
 #checkout {
   @include for-desktop {

@@ -1,5 +1,4 @@
 import { GluegunToolbox } from "gluegun";
-import { getAvailableLanguages, setup } from "@shopware-pwa/shopware-6-client";
 import { merge } from "lodash";
 
 module.exports = {
@@ -24,10 +23,13 @@ module.exports = {
       (await toolbox.filesystem.listAsync("locales")) || [];
 
     await toolbox.filesystem.removeAsync(shopwarePwaLocalesPath);
-    await toolbox.filesystem.copyAsync(
-      themeLanguagesDir,
-      shopwarePwaLocalesPath
-    );
+
+    if (await toolbox.filesystem.existsAsync(themeLanguagesDir)) {
+      await toolbox.filesystem.copyAsync(
+        themeLanguagesDir,
+        shopwarePwaLocalesPath
+      );
+    }
 
     // Override theme translations by project translations
     for (let index = 0; index < projectLocales.length; index++) {
@@ -62,15 +64,16 @@ module.exports = {
     const isLocalReload = !!toolbox.parameters.options.local;
     // reload language files from shopware instance
     if (!isLocalReload) {
+      const apiClient = require("@shopware-pwa/shopware-6-client");
       const languagesMap = {};
 
       try {
-        setup({
+        apiClient.setup({
           endpoint: inputParameters.shopwareEndpoint,
           accessToken: inputParameters.shopwareAccessToken,
         });
 
-        const langs: any = await getAvailableLanguages();
+        const langs: any = await apiClient.getAvailableLanguages();
         langs.forEach((lang) => {
           const language = {
             id: lang.id,

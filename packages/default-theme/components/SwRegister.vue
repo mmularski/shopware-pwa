@@ -25,7 +25,7 @@
           {{ salutationOption.name }}
         </SfSelectOption>
       </SfSelect>
-      <SfInput
+      <SwInput
         v-model="firstName"
         name="first-name"
         label="First Name"
@@ -34,7 +34,7 @@
         error-message="First name is required"
         @blur="$v.firstName.$touch()"
       />
-      <SfInput
+      <SwInput
         v-model="lastName"
         name="last-name"
         label="Last Name"
@@ -43,7 +43,7 @@
         error-message="Last name is required"
         @blur="$v.lastName.$touch()"
       />
-      <SfInput
+      <SwInput
         v-model="email"
         name="email"
         label="Your email"
@@ -52,7 +52,7 @@
         error-message="Proper email is required"
         @blur="$v.email.$touch()"
       />
-      <SfInput
+      <SwInput
         v-model="password"
         name="password"
         label="Password"
@@ -62,7 +62,7 @@
         error-message="Minimum password length is 8 characters"
         @blur="$v.password.$touch()"
       />
-      <SfInput
+      <SwInput
         v-model="street"
         name="street"
         label="Street"
@@ -71,7 +71,7 @@
         error-message="Street is required"
         @blur="$v.street.$touch()"
       />
-      <SfInput
+      <SwInput
         v-model="city"
         name="city"
         label="City"
@@ -80,7 +80,7 @@
         error-message="City is required"
         @blur="$v.city.$touch()"
       />
-      <SfInput
+      <SwInput
         v-model="zipcode"
         name="zipcode"
         label="Zip Code"
@@ -106,45 +106,47 @@
           {{ countryOption.name }}
         </SfSelectOption>
       </SfSelect>
-      <SfButton
+      <SwButton
         class="sf-button--full-width form__button"
         :disabled="isLoading"
         @click="invokeRegister"
       >
         Create an account
-      </SfButton>
+      </SwButton>
     </div>
   </div>
 </template>
 
 <script>
-import { computed } from '@vue/composition-api'
-import { SfAlert, SfInput, SfButton, SfSelect } from '@storefront-ui/vue'
-import { validationMixin } from 'vuelidate'
-import { required, email, minLength } from 'vuelidate/lib/validators'
+import { computed } from "@vue/composition-api"
+import { SfAlert, SfSelect } from "@storefront-ui/vue"
+import { validationMixin } from "vuelidate"
+import { required, email, minLength } from "vuelidate/lib/validators"
 import {
   useUser,
   useCountries,
   useSalutations,
-} from '@shopware-pwa/composables'
-import { mapCountries, mapSalutations } from '@shopware-pwa/helpers'
-import SwPluginSlot from 'sw-plugins/SwPluginSlot'
+} from "@shopware-pwa/composables"
+import { mapCountries, mapSalutations } from "@shopware-pwa/helpers"
+import SwPluginSlot from "sw-plugins/SwPluginSlot"
+import SwButton from "@shopware-pwa/default-theme/components/atoms/SwButton"
+import SwInput from "@shopware-pwa/default-theme/components/atoms/SwInput"
 
 export default {
-  name: 'SwResetPassword',
-  components: { SfButton, SfInput, SfAlert, SfSelect, SwPluginSlot },
+  name: "SwResetPassword",
+  components: { SwButton, SwInput, SfAlert, SfSelect, SwPluginSlot },
   mixins: [validationMixin],
   data() {
     return {
-      firstName: '',
-      lastName: '',
-      email: '',
-      password: '',
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
       salutation: null,
       country: null,
-      street: '',
-      city: '',
-      zipcode: '',
+      street: "",
+      city: "",
+      zipcode: "",
     }
   },
   setup() {
@@ -190,7 +192,7 @@ export default {
     },
     getErrorMessage() {
       if (this.userError)
-        return 'Cannot create a new account, the user may already exist'
+        return "Cannot create a new account, the user may already exist"
       if (this.salutationsError)
         return "Couldn't fetch available salutations, please contact the administration."
       if (this.countriesError)
@@ -242,7 +244,7 @@ export default {
           username: this.email,
           password: this.password,
         })
-        this.$emit('success')
+        this.$emit("success")
       }
     },
   },
@@ -250,7 +252,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '~@storefront-ui/vue/styles';
+@import "@/assets/scss/variables";
 
 .sw-login {
   &__alert {
@@ -286,7 +288,7 @@ export default {
     &__element {
       flex: 0 0 100%;
       &--small {
-        flex: 1 1 calc(33% - calc(2*var(--spacer-sm)));
+        flex: 1 1 calc(33% - calc(2 * var(--spacer-sm)));
         margin-right: var(--spacer-sm);
         &:odd {
           margin-right: 0;
@@ -302,7 +304,7 @@ export default {
 </style>
 
 //
-<style lang="scss">
+<style lang="scss" scoped>
 // .sf-modal__container {
 //   width: 100% !important;
 //   height: 100% !important;

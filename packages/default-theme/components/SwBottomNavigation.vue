@@ -1,7 +1,7 @@
 <template>
   <div class="sw-bottom-navigation">
     <SfBottomNavigation>
-      <nuxt-link aria-label="Go to Home Page" to="/">
+      <nuxt-link aria-label="Go to Home Page" :to="$i18n.path('/')">
         <SfBottomNavigationItem label="Home" icon="home" icon-size="20px" />
       </nuxt-link>
       <SfBottomNavigationItem
@@ -31,12 +31,30 @@
       <SfBottomNavigationItem
         icon="profile"
         label="My Account"
-        size="20px"
-        @click="userIconClick"
-      />
+        class="menu-button"
+      >
+        <template #icon>
+          <SfIcon icon="profile" size="20px" @click="userIconClick" />
+          <SfSelect v-if="isLoggedIn" class="menu-button__select">
+            <!-- TODO: change .native to @click after https://github.com/DivanteLtd/storefront-ui/issues/1097 -->
+            <SfSelectOption
+              :value="getPageAccount"
+              @click.native="goToMyAccount"
+            >
+              My account
+            </SfSelectOption>
+            <!-- TODO: change .native to @click after https://github.com/DivanteLtd/storefront-ui/issues/1097 -->
+            <SfSelectOption :value="'logout'">
+              <SwButton class="sf-button--full-width" @click="logoutUser">
+                Logout
+              </SwButton>
+            </SfSelectOption>
+          </SfSelect>
+        </template>
+      </SfBottomNavigationItem>
       <SfBottomNavigationItem label="Currency" class="menu-button">
         <template #icon>
-          <SwCurrency class="menu-button__currency" />
+          <SwCurrencySwitcher class="menu-button__currency" />
         </template>
       </SfBottomNavigationItem>
       <SfBottomNavigationItem
@@ -45,12 +63,12 @@
         :is-floating="true"
       >
         <template #icon>
-          <SfCircleIcon 
-            aria-label="Go to Cart" 
-            @click="toggleSidebar" 
-            icon="empty_cart" 
+          <SfCircleIcon
+            aria-label="Go to Cart"
+            icon="empty_cart"
             :has-badge="count > 0"
             :badge-label="count.toString()"
+            @click="toggleSidebar"
           />
         </template>
       </SfBottomNavigationItem>
@@ -65,56 +83,65 @@ import {
   SfIcon,
   SfSelect,
   SfProductOption,
-} from '@storefront-ui/vue'
+} from "@storefront-ui/vue"
 import {
-  useCartSidebar,
+  useUIState,
   useNavigation,
   useUser,
   useCart,
-  useUserLoginModal,
-} from '@shopware-pwa/composables'
-import { PAGE_ACCOUNT } from '../helpers/pages'
-import SwCurrency from '@shopware-pwa/default-theme/components/SwCurrency'
-import { onMounted } from '@vue/composition-api'
+} from "@shopware-pwa/composables"
+import SwCurrencySwitcher from "@shopware-pwa/default-theme/components/SwCurrencySwitcher"
+import { onMounted } from "@vue/composition-api"
+import SwButton from "@shopware-pwa/default-theme/components/atoms/SwButton"
+import { PAGE_ACCOUNT, PAGE_LOGIN } from "../helpers/pages"
 
 export default {
-  name: 'SwBottomNavigation',
+  name: "SwBottomNavigation",
   components: {
     SfBottomNavigation,
     SfIcon,
     SfCircleIcon,
     SfSelect,
     SfProductOption,
-    SwCurrency,
+    SwCurrencySwitcher,
+    SwButton,
   },
   data() {
     return {
       navigationElements: [],
-      currentRoute: { routeLabel: '', routePath: '/' },
+      currentRoute: { routeLabel: "", routePath: "/" },
     }
   },
   setup() {
-    const { toggleSidebar, isSidebarOpen } = useCartSidebar()
+    const { switchState: toggleSidebar, isOpen: isSidebarOpen } = useUIState(
+      "CART_SIDEBAR_STATE"
+    )
     const { routes, fetchRoutes } = useNavigation()
-    const { toggleModal } = useUserLoginModal()
-    const { isLoggedIn } = useUser()
+    const { switchState: toggleModal } = useUIState("LOGIN_MODAL_STATE")
+    const { isLoggedIn, logout } = useUser()
     const { count } = useCart()
 
     onMounted(async () => {
       try {
         await fetchRoutes()
       } catch (e) {
-        console.error('[SwBottomNavigation]', e)
+        console.error("[SwBottomNavigation]", e)
       }
     })
     return {
       isLoggedIn,
+      logout,
       routes,
       isSidebarOpen,
       toggleSidebar,
       toggleModal,
-      count
+      count,
     }
+  },
+  computed: {
+    getPageAccount() {
+      return PAGE_ACCOUNT
+    },
   },
   watch: {
     currentRoute(nextRoute) {
@@ -125,9 +152,14 @@ export default {
     userIconClick() {
       if (this.isLoggedIn) {
         this.$router.push(this.$i18n.path(PAGE_ACCOUNT))
-        return
-      }
-      this.toggleModal()
+      } else this.toggleModal()
+    },
+    goToMyAccount() {
+      this.$router.push(this.$i18n.path(PAGE_ACCOUNT))
+    },
+    async logoutUser() {
+      await this.logout()
+      this.$router.push(this.$i18n.path("/"))
     },
   },
 }
@@ -148,6 +180,7 @@ export default {
     --select-margin: 0;
     text-align: center;
     position: absolute;
+    text-transform: uppercase;
   }
 }
 </style>
