@@ -1,22 +1,39 @@
 import { getPageResolverEndpoint } from "../endpoints";
-import { apiService } from "../apiService";
+import { defaultInstance, ShopwareApiInstance } from "../apiService";
 import { SearchCriteria } from "@shopware-pwa/commons/interfaces/search/SearchCriteria";
 import { CmsPage } from "@shopware-pwa/commons/interfaces/models/content/cms/CmsPage";
+import { Product } from "@shopware-pwa/commons/interfaces/models/content/product/Product";
+import { Aggregation } from "@shopware-pwa/commons/interfaces/search/Aggregation";
+
 import { convertSearchCriteria } from "../helpers/searchConverter";
 
 /**
- * @alpha
+ * @beta
  */
 export interface PageResolverResult<T> {
+  cmsPage: T;
   breadcrumb: {
     [id: string]: {
       name: string;
       path: string;
     };
   };
+  listingConfiguration: any;
   resourceType: string;
   resourceIdentifier: string;
-  cmsPage: T;
+  apiAlias: string;
+}
+
+/**
+ * @beta
+ */
+export interface PageResolverProductResult {
+  product: Partial<Product>;
+  aggregations: Aggregation[];
+  resourceType: string;
+  resourceIdentifier: string;
+  cannonicalPathInfo: string;
+  apiAlias: string;
 }
 
 /**
@@ -25,11 +42,35 @@ export interface PageResolverResult<T> {
  */
 export async function getPage(
   path: string,
-  searchCriteria?: SearchCriteria
+  searchCriteria?: SearchCriteria,
+  contextInstance: ShopwareApiInstance = defaultInstance
 ): Promise<PageResolverResult<CmsPage>> {
-  const resp = await apiService.post(getPageResolverEndpoint(), {
+  const resp = await contextInstance.invoke.post(getPageResolverEndpoint(), {
     path: path,
-    ...convertSearchCriteria(searchCriteria),
+    ...convertSearchCriteria({
+      searchCriteria,
+      config: contextInstance.config,
+    }),
+  });
+
+  return resp.data;
+}
+
+/**
+ * @throws ClientApiError
+ * @beta
+ */
+export async function getProductPage(
+  path: string,
+  searchCriteria?: SearchCriteria,
+  contextInstance: ShopwareApiInstance = defaultInstance
+): Promise<PageResolverProductResult> {
+  const resp = await contextInstance.invoke.post(getPageResolverEndpoint(), {
+    path: path,
+    ...convertSearchCriteria({
+      searchCriteria,
+      config: contextInstance.config,
+    }),
   });
 
   return resp.data;

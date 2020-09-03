@@ -5,31 +5,64 @@
 ```ts
 
 import { AddressType } from '@shopware-pwa/commons/interfaces/models/checkout/customer/CustomerAddress';
+import { Association } from '@shopware-pwa/commons/interfaces/search/Association';
 import { BillingAddress } from '@shopware-pwa/commons/interfaces/request/GuestOrderParams';
 import { Cart } from '@shopware-pwa/commons/interfaces/models/checkout/cart/Cart';
 import { Country } from '@shopware-pwa/commons/interfaces/models/system/country/Country';
 import { Currency } from '@shopware-pwa/commons/interfaces/models/system/currency/Currency';
 import { Customer } from '@shopware-pwa/commons/interfaces/models/checkout/customer/Customer';
 import { CustomerAddress } from '@shopware-pwa/commons/interfaces/models/checkout/customer/CustomerAddress';
-import { CustomerAddressParam } from '@shopware-pwa/shopware-6-client';
 import { CustomerRegistrationParams } from '@shopware-pwa/commons/interfaces/request/CustomerRegistrationParams';
 import { CustomerResetPasswordParam } from '@shopware-pwa/shopware-6-client';
 import { CustomerUpdateEmailParam } from '@shopware-pwa/shopware-6-client';
 import { CustomerUpdatePasswordParam } from '@shopware-pwa/shopware-6-client';
 import { CustomerUpdateProfileParam } from '@shopware-pwa/shopware-6-client';
+import { EqualsFilter } from '@shopware-pwa/commons/interfaces/search/SearchFilter';
 import { GuestOrderParams } from '@shopware-pwa/commons/interfaces/request/GuestOrderParams';
+import { Includes } from '@shopware-pwa/commons/interfaces/search/SearchCriteria';
 import { LineItem } from '@shopware-pwa/commons/interfaces/models/checkout/cart/line-item/LineItem';
 import { NavigationElement } from '@shopware-pwa/commons/interfaces/models/content/navigation/Navigation';
 import { Order } from '@shopware-pwa/commons/interfaces/models/checkout/order/Order';
 import { PaymentMethod } from '@shopware-pwa/commons/interfaces/models/checkout/payment/PaymentMethod';
 import { Product } from '@shopware-pwa/commons/interfaces/models/content/product/Product';
 import { ProductListingResult } from '@shopware-pwa/commons/interfaces/response/ProductListingResult';
+import { RangeFilter } from '@shopware-pwa/commons/interfaces/search/SearchFilter';
 import { Ref } from '@vue/composition-api';
 import { Salutation } from '@shopware-pwa/commons/interfaces/models/system/salutation/Salutation';
-import { SearchCriteria } from '@shopware-pwa/commons/interfaces/search/SearchCriteria';
 import { SessionContext } from '@shopware-pwa/commons/interfaces/response/SessionContext';
 import { ShippingAddress } from '@shopware-pwa/commons/interfaces/request/GuestOrderParams';
 import { ShippingMethod } from '@shopware-pwa/commons/interfaces/models/checkout/shipping/ShippingMethod';
+import { ShopwareApiInstance } from '@shopware-pwa/shopware-6-client';
+import { Sort } from '@shopware-pwa/commons/interfaces/search/SearchCriteria';
+import { VueConstructor } from 'vue';
+
+// @beta
+export interface ApplicationVueContext extends VueConstructor {
+    // (undocumented)
+    $cookies?: any;
+    // (undocumented)
+    $i18n?: any;
+    // (undocumented)
+    $router?: any;
+    // (undocumented)
+    $shopwareApiInstance?: ShopwareApiInstance;
+    // (undocumented)
+    $shopwareDefaults?: any;
+    // (undocumented)
+    $store?: any;
+    // (undocumented)
+    cookies?: any;
+    // (undocumented)
+    i18n?: any;
+    // (undocumented)
+    router?: any;
+    // (undocumented)
+    shopwareApiInstance?: ShopwareApiInstance;
+    // (undocumented)
+    shopwareDefaults?: any;
+    // (undocumented)
+    store?: any;
+}
 
 // @alpha (undocumented)
 export interface CheckoutStepFields {
@@ -55,8 +88,8 @@ export interface CreateCheckoutStep {
 export function createCheckoutStep({ stepNumber, stepFields, stepDataUpdated, }: {
     stepNumber: number;
     stepFields: CheckoutStepFields;
-    stepDataUpdated: (updatedData: CheckoutStepFields) => void;
-}): () => CreateCheckoutStep;
+    stepDataUpdated: (updatedData: CheckoutStepFields, guestOrderParams: Ref<Readonly<Partial<GuestOrderParams>>>) => Partial<GuestOrderParams>;
+}): (rootContext: ApplicationVueContext) => CreateCheckoutStep;
 
 // @beta (undocumented)
 export interface CurrentPagination {
@@ -68,8 +101,24 @@ export interface CurrentPagination {
     total: number | undefined;
 }
 
-// @alpha (undocumented)
-export function getStore(): any;
+// @beta (undocumented)
+export function getApplicationContext(rootContext: ApplicationVueContext, key?: string): {
+    apiInstance: ShopwareApiInstance | undefined;
+    vuexStore: any;
+    router: any;
+    i18n: any;
+    cookies: any;
+    shopwareDefaults: any;
+    contextName: string;
+};
+
+// @beta
+export function getDefaultApiParams(): {
+    [composableName: string]: {
+        includes?: Includes;
+        associations?: Association[];
+    };
+};
 
 // @beta
 export interface IUseAddToCart {
@@ -128,7 +177,7 @@ export interface IUseCheckout {
         forceReload: boolean;
     }) => Promise<Readonly<Ref<readonly ShippingMethod[]>>>;
     // (undocumented)
-    guestOrderParams: Ref<Readonly<Partial<GuestOrderParams | null>>>;
+    guestOrderParams: Ref<Readonly<Partial<GuestOrderParams>>>;
     isGuestOrder: Readonly<Ref<boolean>>;
     // (undocumented)
     paymentMethods: Readonly<Ref<readonly PaymentMethod[]>>;
@@ -175,7 +224,7 @@ export interface IUseSessionContext {
 // @beta
 export interface IUseUser {
     // (undocumented)
-    addAddress: (params: CustomerAddressParam) => Promise<boolean>;
+    addAddress: (params: Partial<CustomerAddress>) => Promise<boolean>;
     // (undocumented)
     addresses: Ref<CustomerAddress[] | null>;
     // (undocumented)
@@ -233,23 +282,20 @@ export interface IUseUser {
 // @alpha (undocumented)
 export type Search = (path: string, associations?: any) => any;
 
-// @alpha (undocumented)
-export function setStore(ref: any): void;
+// @beta
+export const useAddToCart: (rootContext: ApplicationVueContext, product: Product) => IUseAddToCart;
 
 // @beta
-export const useAddToCart: (product: Product) => IUseAddToCart;
-
-// @beta
-export const useCart: () => IUseCart;
+export const useCart: (rootContext: ApplicationVueContext) => IUseCart;
 
 // @alpha (undocumented)
-export const useCategoryFilters: () => any;
+export const useCategoryFilters: (rootContext: ApplicationVueContext) => any;
 
 // @beta
-export const useCheckout: () => IUseCheckout;
+export const useCheckout: (rootContext: ApplicationVueContext) => IUseCheckout;
 
 // @alpha (undocumented)
-export const useCms: () => any;
+export const useCms: (rootContext: ApplicationVueContext) => any;
 
 // @alpha (undocumented)
 export interface UseCountries {
@@ -264,7 +310,7 @@ export interface UseCountries {
 }
 
 // @alpha (undocumented)
-export const useCountries: () => UseCountries;
+export const useCountries: (rootContext: ApplicationVueContext) => UseCountries;
 
 // @alpha (undocumented)
 export interface UseCurrency {
@@ -283,10 +329,16 @@ export interface UseCurrency {
 }
 
 // @alpha (undocumented)
-export const useCurrency: () => UseCurrency;
+export const useCurrency: (rootContext: ApplicationVueContext) => UseCurrency;
 
 // @beta
-export const useNavigation: () => IUseNavigation;
+export const useDefaults: (rootContext: ApplicationVueContext, defaultsKey: string) => {
+    getIncludesConfig: () => Includes;
+    getAssociationsConfig: () => Association[];
+};
+
+// @beta
+export const useNavigation: (rootContext: ApplicationVueContext) => IUseNavigation;
 
 // @alpha (undocumented)
 export interface UseProduct<PRODUCT, SEARCH> {
@@ -303,7 +355,7 @@ export interface UseProduct<PRODUCT, SEARCH> {
 }
 
 // @alpha (undocumented)
-export const useProduct: (loadedProduct?: any) => UseProduct<Product, Search>;
+export const useProduct: (rootContext: ApplicationVueContext, loadedProduct?: any) => UseProduct<Product, Search>;
 
 // @alpha (undocumented)
 export interface UseProductListing {
@@ -316,12 +368,16 @@ export interface UseProductListing {
 }
 
 // @alpha (undocumented)
-export const useProductListing: (initialListing?: ProductListingResult | undefined) => UseProductListing;
+export const useProductListing: (rootContext: ApplicationVueContext, initialListing?: ProductListingResult | undefined) => UseProductListing;
 
 // @alpha (undocumented)
 export interface UseProductSearch {
     // (undocumented)
+    availableFilters: Readonly<Ref<any>>;
+    // (undocumented)
     changePage: (page: number) => Promise<void>;
+    // (undocumented)
+    changeSorting: (sorting: Sort) => void;
     // (undocumented)
     currentPagination: Ref<CurrentPagination | undefined>;
     // (undocumented)
@@ -331,17 +387,25 @@ export interface UseProductSearch {
     // (undocumented)
     loadingSuggestions: Readonly<Ref<boolean>>;
     // (undocumented)
-    search: (term: string, searchCriteria?: SearchCriteria) => Promise<void>;
+    resetFilters: () => void;
+    // (undocumented)
+    search: (term: string) => Promise<void>;
     // (undocumented)
     searchResult: Readonly<Ref<ProductListingResult | null>>;
+    // (undocumented)
+    selectedEntityFilters: Readonly<Ref<any>>;
+    // (undocumented)
+    selectedFilters: Readonly<Ref<any>>;
     // (undocumented)
     suggestionsResult: Readonly<Ref<ProductListingResult | null>>;
     // (undocumented)
     suggestSearch: (term: string) => Promise<void>;
+    // (undocumented)
+    toggleFilter: (filter: EqualsFilter | RangeFilter, forceSave: boolean) => void;
 }
 
 // @alpha (undocumented)
-export const useProductSearch: () => UseProductSearch;
+export const useProductSearch: (rootContext: ApplicationVueContext) => UseProductSearch;
 
 // @alpha (undocumented)
 export interface UseSalutations {
@@ -356,19 +420,19 @@ export interface UseSalutations {
 }
 
 // @alpha (undocumented)
-export const useSalutations: () => UseSalutations;
+export const useSalutations: (rootContext: ApplicationVueContext) => UseSalutations;
 
 // @beta
-export const useSessionContext: () => IUseSessionContext;
+export const useSessionContext: (rootContext: ApplicationVueContext) => IUseSessionContext;
 
 // @beta
-export const useUIState: (stateName?: string | undefined) => {
+export const useUIState: (rootContext: ApplicationVueContext, stateName?: string | undefined) => {
     isOpen: Readonly<Ref<boolean>>;
     switchState: (to?: boolean | undefined) => void;
 };
 
 // @beta
-export const useUser: () => IUseUser;
+export const useUser: (rootContext: ApplicationVueContext) => IUseUser;
 
 // @alpha (undocumented)
 export interface VuelidateValidation {

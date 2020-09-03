@@ -3,6 +3,35 @@ import axios from "axios";
 import { join } from "path";
 
 module.exports = (toolbox: GluegunToolbox) => {
+  toolbox.plugins = {};
+
+  let runningRefreshPlugins: boolean = false;
+  toolbox.plugins.invokeRefreshPlugins = async (devMode: boolean = false) => {
+    if (runningRefreshPlugins) {
+      return;
+    }
+    runningRefreshPlugins = true;
+    await toolbox?.runtime?.run(`plugins`, { ci: true, devMode });
+    runningRefreshPlugins = false;
+  };
+
+  toolbox.plugins.getPluginsConfig = async (
+    options: {
+      localPlugins?: boolean;
+    } = {}
+  ) => {
+    if (options.localPlugins) {
+      return toolbox.filesystem.readAsync(
+        `sw-plugins/local-plugins.json`,
+        "json"
+      );
+    }
+    return toolbox.filesystem.readAsync(
+      `.shopware-pwa/pwa-bundles.json`,
+      "json"
+    );
+  };
+
   toolbox.fetchPluginsAuthToken = async (
     { shopwareEndpoint, username, password } = toolbox.inputParameters
   ) => {
@@ -27,7 +56,7 @@ module.exports = (toolbox: GluegunToolbox) => {
     authToken: string;
   }) => {
     const pluginsConfigRsponse = await axios.post(
-      `${shopwareEndpoint}/api/v1/_action/pwa/dump-bundles`,
+      `${shopwareEndpoint}/api/v3/_action/pwa/dump-bundles`,
       null,
       {
         headers: {

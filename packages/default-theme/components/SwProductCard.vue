@@ -22,7 +22,7 @@
 import { SfProductCard, SfAddToCart } from "@storefront-ui/vue"
 import { useAddToCart } from "@shopware-pwa/composables"
 import {
-  getProductMainImageUrl,
+  getProductThumbnailUrl,
   getProductRegularPrice,
   getProductUrl,
   getProductSpecialPrice,
@@ -34,8 +34,11 @@ export default {
     SfProductCard,
     SfAddToCart,
   },
-  setup({ product }) {
-    const { addToCart, quantity, getStock, isInCart } = useAddToCart(product)
+  setup({ product }, { root }) {
+    const { addToCart, quantity, getStock, isInCart } = useAddToCart(
+      root,
+      product
+    )
     return {
       quantity,
       addToCart,
@@ -71,7 +74,7 @@ export default {
     },
     getImageUrl() {
       return (
-        getProductMainImageUrl(this.product) ||
+        getProductThumbnailUrl(this.product) ||
         require("@shopware-pwa/default-theme/assets/productB.jpg")
       )
     },

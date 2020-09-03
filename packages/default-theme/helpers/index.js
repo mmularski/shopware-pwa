@@ -22,18 +22,19 @@ export function formatPrice(price, options) {
 }
 
 export const getSortingLabel = (sorting) => {
-  if (!sorting || !sorting.order || !sorting.field) {
+  if (!sorting || !sorting.field) {
     return ""
   }
 
   const ascLabel = "ascending"
   const descLabel = "descending"
 
-  const label = sorting.order === "desc" ? descLabel : ascLabel
-  return `${sorting.field} ${label}`
+  const label =
+    sorting.order && (sorting.order === "desc" ? descLabel : ascLabel)
+  return label ? `${sorting.field} ${label}` : sorting.field
 }
 
-export const formatDate = (date, format = `DD-MM-YYYY H:m:s`) =>
+export const formatDate = (date, format = `DD-MM-YYYY HH:mm:ss`) =>
   dayjs(date).format(format)
 
 export const getSearchPageUrl = (searchTerm) =>

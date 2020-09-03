@@ -1,13 +1,25 @@
 <template>
-  <div class="search-page" :key="$route.fullPath">
-    <h3 class="search-page__warning" v-if="!searchQuery && startedSearching">
+  <div :key="$route.fullPath" class="search-page">
+    <h3 v-if="!searchQuery && startedSearching" class="search-page__warning">
       You didn't provide any term to be found
     </h3>
-    <SfLoader :loading="loadingSearch || !startedSearching" v-else>
-      <div class="search-page__main" v-if="searchResult">
+    <SfLoader v-else :loading="loadingSearch || !startedSearching">
+      <div v-if="searchResult" class="search-page__main">
         <h3>
-          search results for <strong>{{ searchQuery }}</strong> :
+          search results for
+          <strong>{{ searchQuery }}</strong
+          >:
         </h3>
+        <SwProductListingFilters
+          :listing="searchResult"
+          :selected-filters="selectedFilters"
+          :selected-entity-filters="selectedEntityFilters"
+          :filters="availableFilters"
+          @reset-filters="resetFiltersHandler"
+          @submit-filters="submitFilters"
+          @change-sorting="changeSorting"
+          @toggle-filter-value="toggleFilter"
+        />
         <SwProductListing
           :listing="searchResult"
           :loading="loadingSearch"
@@ -15,47 +27,50 @@
           @change-page="changePage"
         />
       </div>
+      <h3 class="search-page__warning" v-if="error">{{ error }}</h3>
     </SfLoader>
   </div>
 </template>
 <script>
-import { SfButton, SfHeading, SfIcon, SfLoader } from "@storefront-ui/vue"
+import { SfLoader } from "@storefront-ui/vue"
 import { useProductSearch, useUIState } from "@shopware-pwa/composables"
 
-import {
-  ref,
-  getCurrentInstance,
-  computed,
-  watchEffect,
-} from "@vue/composition-api"
+import { ref } from "@vue/composition-api"
 import SwProductListing from "@shopware-pwa/default-theme/components/SwProductListing"
+import SwProductListingFilters from "@shopware-pwa/default-theme/components/SwProductListingFilters"
 
 export default {
   name: "SearchResultsPage",
   watchQuery: true,
   components: {
-    SfHeading,
-    SfButton,
-    SfIcon,
     SfLoader,
     SwProductListing,
+    SwProductListingFilters,
   },
-  setup() {
-    const vm = getCurrentInstance()
+  setup(props, { root }) {
     const {
       search,
       currentSearchTerm,
       searchResult,
       loadingSearch,
       changePage,
-    } = useProductSearch()
+      changeSorting,
+      toggleFilter,
+      selectedFilters,
+      selectedEntityFilters,
+      availableFilters,
+      resetFilters,
+    } = useProductSearch(root)
+
+    const submitFilters = () => changePage(1)
+    const error = ref(null)
 
     const searchQuery = ref(currentSearchTerm.value)
     const startedSearching = ref(false)
-    const { isOpen: isListView } = useUIState("PRODUCT_LISTING_STATE")
+    const { isOpen: isListView } = useUIState(root, "PRODUCT_LISTING_STATE")
 
-    watchEffect(async () => {
-      searchQuery.value = vm.$route.query.query
+    const invokeSearch = async () => {
+      searchQuery.value = root.$route.query.query
       startedSearching.value = true
       if (
         searchQuery.value &&
@@ -66,10 +81,12 @@ export default {
         try {
           await search(searchQuery.value)
         } catch (e) {
-          console.error("search: " + e)
+          console.error("SearchResultsPage:watchEffect:search: " + e.message)
+          error.value =
+            "Something went wrong. Please try again or report a bug."
         }
       }
-    })
+    }
 
     return {
       searchResult,
@@ -78,12 +95,39 @@ export default {
       startedSearching,
       changePage,
       isListView,
+      changeSortingInternal: changeSorting,
+      toggleFilter,
+      selectedFilters,
+      selectedEntityFilters,
+      search,
+      submitFilters,
+      availableFilters,
+      resetFilters,
+      error,
+      invokeSearch,
     }
+  },
+  watch: {
+    $route: {
+      immediate: true,
+      handler() {
+        this.invokeSearch()
+      },
+    },
+  },
+  methods: {
+    changeSorting(sorting) {
+      this.changeSortingInternal(sorting)
+    },
+    async resetFiltersHandler() {
+      this.resetFilters()
+      await this.search(this.searchQuery)
+    },
   },
 }
 </script>
 <style lang="scss">
-@import "~@storefront-ui/vue/styles.scss";
+@import "@/assets/scss/variables";
 
 .search-page {
   @include for-desktop {

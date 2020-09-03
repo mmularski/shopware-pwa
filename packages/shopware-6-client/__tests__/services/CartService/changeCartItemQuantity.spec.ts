@@ -1,50 +1,52 @@
 import { changeCartItemQuantity } from "@shopware-pwa/shopware-6-client";
-import { apiService } from "../../../src/apiService";
+import { defaultInstance } from "../../../src/apiService";
 import { random, commerce } from "faker";
 
 jest.mock("../../../src/apiService");
-const mockedAxios = apiService as jest.Mocked<typeof apiService>;
+const mockedApiInstance = defaultInstance as jest.Mocked<
+  typeof defaultInstance
+>;
 
 describe("CartService - changeCartItemQuantity", () => {
+  const mockedPatch = jest.fn();
   beforeEach(() => {
     jest.resetAllMocks();
+    mockedApiInstance.invoke = {
+      patch: mockedPatch,
+    } as any;
   });
 
   it("should call valid endpoint and return cart with no items", async () => {
-    mockedAxios.patch.mockResolvedValueOnce({
+    mockedPatch.mockResolvedValueOnce({
       data: {
-        data: {
-          name: random.uuid(),
-          token: random.uuid(),
-          lineItems: [
-            {
-              id: "geawq90a5dab4206843d0vc3sa8wefdf",
-              label: commerce.productName(),
-              quantity: 3,
-              payload: {
-                productNumber: random.uuid,
-              },
+        name: random.uuid(),
+        token: random.uuid(),
+        lineItems: [
+          {
+            id: "geawq90a5dab4206843d0vc3sa8wefdf",
+            label: commerce.productName(),
+            quantity: 3,
+            payload: {
+              productNumber: random.uuid,
             },
-          ],
-        },
+          },
+        ],
       },
     });
 
     let lineItemId = "geawq90a5dab4206843d0vc3sa8wefdf";
 
     const result = await changeCartItemQuantity(lineItemId, 3);
-    expect(mockedAxios.patch).toBeCalledTimes(1);
-    expect(
-      mockedAxios.patch
-    ).toBeCalledWith(
-      "/sales-channel-api/v1/checkout/cart/line-item/geawq90a5dab4206843d0vc3sa8wefdf",
-      { quantity: 3 }
+    expect(mockedPatch).toBeCalledTimes(1);
+    expect(mockedPatch).toBeCalledWith(
+      "/store-api/v3/checkout/cart/line-item",
+      { items: [{ quantity: 3, id: "geawq90a5dab4206843d0vc3sa8wefdf" }] }
     );
     expect(result.lineItems[0].quantity).toEqual(3);
   });
 
   it("should throw unhandled 400 error when non-existing lineItemId given", async () => {
-    mockedAxios.patch.mockRejectedValueOnce(
+    mockedPatch.mockRejectedValueOnce(
       new Error("400: CHECKOUT__CART_LINEITEM_NOT_FOUND")
     );
 
@@ -53,17 +55,22 @@ describe("CartService - changeCartItemQuantity", () => {
     expect(changeCartItemQuantity(lineItemId, 1)).rejects.toThrow(
       "400: CHECKOUT__CART_LINEITEM_NOT_FOUND"
     );
-    expect(mockedAxios.patch).toBeCalledTimes(1);
-    expect(mockedAxios.patch).toBeCalledWith(
-      "/sales-channel-api/v1/checkout/cart/line-item/someNonExistingLineItemId",
+    expect(mockedPatch).toBeCalledTimes(1);
+    expect(mockedPatch).toBeCalledWith(
+      "/store-api/v3/checkout/cart/line-item",
       {
-        quantity: 1,
+        items: [
+          {
+            quantity: 1,
+            id: "someNonExistingLineItemId",
+          },
+        ],
       }
     );
   });
 
   it("should throw unhandled 400 error when negative quantity given", async () => {
-    mockedAxios.patch.mockRejectedValueOnce(
+    mockedPatch.mockRejectedValueOnce(
       new Error("400: CHECKOUT__CART_INVALID_LINEITEM_QUANTITY")
     );
 
@@ -72,29 +79,32 @@ describe("CartService - changeCartItemQuantity", () => {
     expect(changeCartItemQuantity(lineItemId, -2)).rejects.toThrow(
       "400: CHECKOUT__CART_INVALID_LINEITEM_QUANTITY"
     );
-    expect(mockedAxios.patch).toBeCalledTimes(1);
-    expect(mockedAxios.patch).toBeCalledWith(
-      "/sales-channel-api/v1/checkout/cart/line-item/geawq90a5dab4206843d0vc3sa8wefdf",
+    expect(mockedPatch).toBeCalledTimes(1);
+    expect(mockedPatch).toBeCalledWith(
+      "/store-api/v3/checkout/cart/line-item",
       {
-        quantity: -2,
+        items: [
+          {
+            id: "geawq90a5dab4206843d0vc3sa8wefdf",
+            quantity: -2,
+          },
+        ],
       }
     );
   });
 
   it("should call api with default value of quantity", async () => {
-    mockedAxios.patch.mockResolvedValueOnce({
+    mockedPatch.mockResolvedValueOnce({
       data: {},
     });
 
     let lineItemId = "geawq90a5dab4206843d0vc3sa8wefdf";
 
     await changeCartItemQuantity(lineItemId);
-    expect(mockedAxios.patch).toBeCalledTimes(1);
-    expect(
-      mockedAxios.patch
-    ).toBeCalledWith(
-      "/sales-channel-api/v1/checkout/cart/line-item/geawq90a5dab4206843d0vc3sa8wefdf",
-      { quantity: 1 }
+    expect(mockedPatch).toBeCalledTimes(1);
+    expect(mockedPatch).toBeCalledWith(
+      "/store-api/v3/checkout/cart/line-item",
+      { items: [{ quantity: 1, id: "geawq90a5dab4206843d0vc3sa8wefdf" }] }
     );
   });
 });

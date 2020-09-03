@@ -22,6 +22,7 @@ export interface UiProductOption {
   value: string;
   code: string;
   attribute: string;
+  color: string;
   [attribute: string]: string;
 }
 
@@ -45,7 +46,7 @@ export interface UiProductReview {
 }
 
 /**
- * @alpha
+ * @beta
  */
 export enum UiCategoryFilterType {
   range = "range",
@@ -55,7 +56,7 @@ export enum UiCategoryFilterType {
 }
 
 /**
- * @alpha
+ * @beta
  */
 export interface UiCategoryFilterOption {
   color: boolean | string;
@@ -65,7 +66,7 @@ export interface UiCategoryFilterOption {
 }
 
 /**
- * @alpha
+ * @beta
  */
 export interface UiCategoryRangeFilterOption {
   max: string;
@@ -73,7 +74,7 @@ export interface UiCategoryRangeFilterOption {
 }
 
 /**
- * @alpha
+ * @beta
  */
 export interface UiCategoryFilter {
   name: string;

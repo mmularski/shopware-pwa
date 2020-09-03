@@ -1,5 +1,5 @@
 <template>
-  <div id="sw-login-modal">
+  <div id="sw-login-modal" data-cy="login-modal">
     <SfModal
       class="sw-modal"
       :title="modalTitle"
@@ -13,8 +13,9 @@
             <SwButton
               class="sf-button--text button--muted"
               @click="component = 'SwResetPassword'"
+              data-cy="forgotten-password-button"
             >
-              Forgotten password?
+              {{ $t("Forgotten password?") }}
             </SwButton>
           </div>
 
@@ -28,8 +29,9 @@
               <SwButton
                 class="sf-button--text bottom__element"
                 @click="component = 'SwRegister'"
+                data-cy="go-to-register-button"
               >
-                Register today?
+                {{ $t("Register today!") }}
               </SwButton>
             </template>
           </div>
@@ -37,8 +39,18 @@
             <SwButton
               class="sf-button--text button--muted"
               @click="component = 'SwLogin'"
+              data-cy="go-to-login-button"
             >
-              or try to log in again.
+              {{ $t("or try to log in again.") }}
+            </SwButton>
+          </div>
+          <div class="mobile-only bottom bottom__close">
+            <SwButton
+              class="sf-button sf-select__cancel sf-button--full-width close-button"
+              @click="toggleModal()"
+              data-cy="toggle-modal-button"
+            >
+              {{ $t("Cancel") }}
             </SwButton>
           </div>
         </div>
@@ -78,9 +90,9 @@ export default {
       default: undefined,
     },
   },
-  setup() {
-    const { login, loading, error } = useUser()
-    const { isOpen, switchState } = useUIState("LOGIN_MODAL_STATE")
+  setup(props, { root }) {
+    const { login, loading, error } = useUser(root)
+    const { isOpen, switchState } = useUIState(root, "LOGIN_MODAL_STATE")
 
     return {
       clientLogin: login,
@@ -133,7 +145,6 @@ export default {
 
 #sw-login-modal {
   box-sizing: border-box;
-  --overlay-z-index: 4;
   --modal-index: 4;
   @include for-desktop {
     & > * {
@@ -180,6 +191,9 @@ export default {
     --heading-title-color: var(--c-primary);
     padding: var(--spacer-sm) 0;
   }
+  &__close {
+    padding-top: var(--spacer-lg);
+  }
   &:last-child {
     padding-bottom: var(--spacer-lg);
   }
@@ -187,6 +201,14 @@ export default {
 
 .sf-button--muted {
   color: var(--c-text-muted);
+}
+
+.close-button {
+  @include for-mobile {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+  }
 }
 
 .salutation {

@@ -16,6 +16,7 @@
               table__description: tableHeader === 'Item',
               table__quantity: tableHeader === 'Quantity',
               table__amount: tableHeader === 'Amount',
+              table__price: tableHeader === 'Price',
             }"
           >
             {{ tableHeader }}
@@ -50,20 +51,28 @@
         class="content"
       />
       <SfProperty name="Order status" :value="status" />
-      <a v-if="paymentUrl" :href="paymentUrl">
-        <SwButton
-          class="sf-button sf-button--full-width pay-button color-danger"
-        >
-          Pay for your order
-        </SwButton>
-      </a>
+      <SfLoader
+        :loading="isPaymentButtonLoading"
+        class="sw-order-details__loader"
+      >
+        <a v-if="paymentUrl" :href="paymentUrl">
+          <SwButton
+            class="sf-button sf-button--full-width pay-button color-danger"
+          >
+            Pay for your order
+          </SwButton>
+        </a>
+        <template #loader>
+          Checking payment status...
+        </template>
+      </SfLoader>
     </div>
   </div>
 </template>
 
 <script>
-import { SfTable, SfProperty, SfHeading } from "@storefront-ui/vue"
-import { useUser } from "@shopware-pwa/composables"
+import { SfTable, SfProperty, SfHeading, SfLoader } from "@storefront-ui/vue"
+import { useUser, getApplicationContext } from "@shopware-pwa/composables"
 import { ref, onMounted, computed, watchEffect } from "@vue/composition-api"
 import SwPluginSlot from "sw-plugins/SwPluginSlot"
 import {
@@ -89,6 +98,7 @@ export default {
     SfProperty,
     SfTable,
     SfHeading,
+    SfLoader,
     SwButton,
     SwOrderDetailsItem,
     SwPersonalDetails,
@@ -108,12 +118,14 @@ export default {
   },
   // TODO: move this logic into separate service;
   // details: https://github.com/DivanteLtd/shopware-pwa/issues/781
-  setup({ orderId }) {
-    const { getOrderDetails, loading, error: userError } = useUser()
+  setup({ orderId }, { root }) {
+    const { apiInstance } = getApplicationContext(root, "myComponent")
+    const { getOrderDetails, loading, error: userError } = useUser(root)
     const order = ref(null)
     const paymentMethod = ref(null)
     const shippingMethod = ref(null)
     const paymentUrl = ref(null)
+    const isPaymentButtonLoading = ref(false)
 
     const personalDetails = computed(
       () =>
@@ -158,19 +170,26 @@ export default {
 
     onMounted(async () => {
       try {
+        isPaymentButtonLoading.value = true
         order.value = await getOrderDetails(orderId)
         paymentMethod.value = await getPaymentMethodDetails(
-          paymentMethodId.value
+          paymentMethodId.value,
+          apiInstance
         )
         shippingMethod.value = await getShippingMethodDetails(
-          shippingMethodId.value
+          shippingMethodId.value,
+          apiInstance
         )
-        const resp = await getOrderPaymentUrl({
-          orderId,
-          finishUrl: `${window.location.origin}${PAGE_ORDER_SUCCESS}?orderId=${orderId}`,
-        })
+        const resp = await getOrderPaymentUrl(
+          {
+            orderId,
+            finishUrl: `${window.location.origin}${PAGE_ORDER_SUCCESS}?orderId=${orderId}`,
+          },
+          apiInstance
+        )
         paymentUrl.value = resp.paymentUrl
       } catch (e) {}
+      isPaymentButtonLoading.value = false
     })
 
     return {
@@ -186,13 +205,14 @@ export default {
       total,
       status,
       paymentUrl,
+      isPaymentButtonLoading,
     }
   },
 }
 </script>
 
 <style lang="scss" scoped>
-@import "~@storefront-ui/vue/styles";
+@import "@/assets/scss/variables";
 
 .sw-order-details {
   padding: 1rem;
@@ -203,6 +223,11 @@ export default {
     flex-direction: column;
     width: 80%;
     padding: var(--spacer-base);
+  }
+
+  &__loader {
+    margin-top: var(--spacer-base);
+    height: 3rem;
   }
 
   &__header {
@@ -254,19 +279,37 @@ export default {
 }
 
 .table {
+  &__row {
+    flex-wrap: nowrap;
+
+    & > th {
+      order: unset;
+    }
+  }
+
   &__data {
+    flex: 1;
+    order: unset;
     text-align: center;
     &:last-of-type {
       text-align: right;
     }
   }
   &__description {
-    flex: 3;
+    flex: 2;
   }
   &__quantity {
     text-align: center;
+    flex: 1;
   }
+
+  &__price {
+    flex: 1;
+    order: unset;
+  }
+
   &__amount {
+    flex: 1;
     text-align: right;
   }
 }

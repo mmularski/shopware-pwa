@@ -9,6 +9,7 @@
   "Go to cart": "Go to cart",
   "Go to checkout": "Go to checkout",
   "Go to My Account": "Go to My Account",
+  "Home": "Home",
   "Log in": "Log in",
   "Logout": "Logout",
   "My account": "My account",
@@ -26,5 +27,12 @@
   "Start shopping": "Start shopping",
   "Total items": "Total items",
   "Total price": "Total price",
-  "Your cart is empty": "Your cart is empty"
+  "Your cart is empty": "Your cart is empty",
+  "More": "More",
+  "Forgotten password?": "Forgotten password?",
+  "or try to log in again.": "or try to log in again.",
+  "Cancel": "Cancel",
+  "Register today!": "Register today!",
+  "send": "send",
+  "Please fill form data and check regulations acceptance.": "Please fill form data and check regulations acceptance."
 }

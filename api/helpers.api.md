@@ -4,9 +4,11 @@
 
 ```ts
 
+import { Aggregations } from '@shopware-pwa/commons/interfaces/search/Aggregations';
 import { Category } from '@shopware-pwa/commons/interfaces/models/content/category/Category';
 import { CmsPage } from '@shopware-pwa/commons/interfaces/models/content/cms/CmsPage';
 import { CmsSection } from '@shopware-pwa/commons/interfaces/models/content/cms/CmsPage';
+import { CmsSlot } from '@shopware-pwa/commons/interfaces/models/content/cms/CmsPage';
 import { Country } from '@shopware-pwa/commons/interfaces/models/system/country/Country';
 import { NavigationElement } from '@shopware-pwa/commons/interfaces/models/content/navigation/Navigation';
 import { Order } from '@shopware-pwa/commons/interfaces/models/checkout/order/Order';
@@ -16,9 +18,12 @@ import { Salutation } from '@shopware-pwa/commons/interfaces/models/system/salut
 import { SearchCriteria } from '@shopware-pwa/commons/interfaces/search/SearchCriteria';
 import { ShopwareError } from '@shopware-pwa/commons/interfaces/errors/ApiError';
 import { Sort } from '@shopware-pwa/commons/interfaces/search/SearchCriteria';
+import { StoreNavigationElement } from '@shopware-pwa/commons/interfaces/models/content/navigation/Navigation';
 
 // @alpha (undocumented)
 export interface CategoryFilterEntityValue {
+    // (undocumented)
+    colorHexCode: null | string;
     // (undocumented)
     customFields: any;
     // (undocumented)
@@ -52,6 +57,9 @@ export interface CategoryFilterTermValue {
 }
 
 // @alpha (undocumented)
+export function debounce<T extends (...args: any[]) => any>(fn: T, delay?: number): T;
+
+// @alpha (undocumented)
 export function exportUrlQuery(searchCriteria: SearchCriteria): string | undefined;
 
 // @alpha (undocumented)
@@ -78,10 +86,19 @@ export function getCategoryAvailableSorting({ sorting, }?: {
 export const getCategoryUrl: (category: Partial<Category>) => string;
 
 // @alpha (undocumented)
+export function getCmsLink(content?: CmsSlot): String;
+
+// @alpha (undocumented)
+export function getCmsLinkTarget(content?: CmsSlot): String;
+
+// @alpha (undocumented)
 export function getCmsSections(content: CmsPage): CmsSection[];
 
 // @alpha (undocumented)
 export const getFilterSearchCriteria: (selectedFilters: any) => any[];
+
+// @beta (undocumented)
+export function getListingAvailableFilters(aggregations: Aggregations | undefined | null): UiCategoryFilter[];
 
 // @alpha
 export function getMessagesFromErrorsArray(errors: ShopwareError[]): string[];
@@ -96,6 +113,9 @@ export function getOrderPaymentMethodId(order: Order): string | undefined;
 export function getOrderShippingMethodId(order: Order): string | undefined;
 
 // @alpha
+export function getProductFreeShipping(product?: Product): boolean;
+
+// @alpha
 export function getProductMainImageUrl(product: Product): string;
 
 // @alpha (undocumented)
@@ -107,6 +127,9 @@ export function getProductMediaGallery({ product, }?: {
 export function getProductName({ product }?: {
     product?: Product;
 }): string | null;
+
+// @alpha
+export function getProductNumber(product: Product): string | null;
 
 // @alpha (undocumented)
 export function getProductOption({ product, attribute, }?: {
@@ -130,6 +153,9 @@ export function getProductProperties({ product, }?: {
     product?: Product;
 }): UiProductProperty[];
 
+// @alpha
+export function getProductRatingAverage(product: Product): number | null;
+
 // @beta
 export function getProductRegularPrice(product: Product): number | undefined;
 
@@ -142,6 +168,9 @@ export function getProductReviews({ product, }?: {
 export function getProductSpecialPrice(product: Product): number | undefined;
 
 // @beta
+export function getProductThumbnailUrl(product: Product): string;
+
+// @beta
 export function getProductTierPrices(product: Product): TierPrice[];
 
 // @alpha (undocumented)
@@ -149,6 +178,9 @@ export function getProductUrl(product: Product | null): string;
 
 // @alpha (undocumented)
 export const getSortingSearchCriteria: (selectedSorting: SwSorting) => Sort;
+
+// @beta (undocumented)
+export function getStoreNavigationRoutes(navigationElements: StoreNavigationElement[]): StoreNavigationRoute[];
 
 // @alpha (undocumented)
 export function getVariantOptionsLabel({ product, }?: {
@@ -159,6 +191,9 @@ export function getVariantOptionsLabel({ product, }?: {
 export function isProductSimple({ product, }?: {
     product?: Product;
 }): boolean;
+
+// @beta
+export function loadScript(src: string): Promise<void>;
 
 // @alpha
 export function mapCountries(countries: Country[]): MappedCountry[];
@@ -208,6 +243,18 @@ export interface Sorting {
     };
 }
 
+// @beta (undocumented)
+export interface StoreNavigationRoute {
+    // (undocumented)
+    children?: StoreNavigationRoute[] | null;
+    // (undocumented)
+    isExternal: boolean;
+    // (undocumented)
+    routeLabel: string;
+    // (undocumented)
+    routePath: string;
+}
+
 // @alpha (undocumented)
 export interface SwSorting {
     // (undocumented)
@@ -230,7 +277,7 @@ export interface TierPrice {
     unitPrice: number;
 }
 
-// @alpha (undocumented)
+// @beta (undocumented)
 export interface UiCategoryFilter {
     // (undocumented)
     name: string;
@@ -240,7 +287,7 @@ export interface UiCategoryFilter {
     type: UiCategoryFilterType;
 }
 
-// @alpha (undocumented)
+// @beta (undocumented)
 export interface UiCategoryFilterOption {
     // (undocumented)
     color: boolean | string;
@@ -252,7 +299,7 @@ export interface UiCategoryFilterOption {
     value: string;
 }
 
-// @alpha (undocumented)
+// @beta (undocumented)
 export enum UiCategoryFilterType {
     // (undocumented)
     entity = "entity",
@@ -264,7 +311,7 @@ export enum UiCategoryFilterType {
     term = "term"
 }
 
-// @alpha (undocumented)
+// @beta (undocumented)
 export interface UiCategoryRangeFilterOption {
     // (undocumented)
     max: string;
@@ -308,6 +355,8 @@ export interface UiProductOption {
     attribute: string;
     // (undocumented)
     code: string;
+    // (undocumented)
+    color: string;
     // (undocumented)
     label: string;
     // (undocumented)

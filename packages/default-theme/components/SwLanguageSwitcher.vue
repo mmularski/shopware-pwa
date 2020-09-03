@@ -1,34 +1,35 @@
 <template>
-  <div class="sw-language-switcher">
+  <div class="sw-language-switcher" data-cy="language-switcher">
     <SfSelect
       :selected="currentLocale"
       :size="availableLanguages.length"
       class="sw-language-switcher__select sf-select--no-chevron"
+      data-cy="language-switcher-select"
       @change="changeLocale"
     >
       <SfSelectOption
         v-for="language in availableLanguages"
         :key="language.code"
         :value="language.code"
+        data-cy="language-switcher-option"
+        >{{ language.name }}</SfSelectOption
       >
-        {{ language.name }}
-      </SfSelectOption>
     </SfSelect>
   </div>
 </template>
 <script>
-import { SfSelect, SfProductOption } from "@storefront-ui/vue"
-import { computed, onMounted, ref } from "@vue/composition-api"
-import languagesMap from "sw-plugins/languages"
+import { SfSelect } from "@storefront-ui/vue"
 import { useLocales } from "@shopware-pwa/default-theme/logic/useLocales"
 
 export default {
   name: "SwLanguageSwitcher",
+
   components: {
     SfSelect,
   },
-  setup() {
-    const { availableLanguages, currentLocale, changeLocale } = useLocales()
+
+  setup(props, { root }) {
+    const { availableLanguages, currentLocale, changeLocale } = useLocales(root)
     return {
       availableLanguages,
       currentLocale,
@@ -41,11 +42,15 @@ export default {
 @import "@/assets/scss/variables";
 
 .sw-language-switcher {
-  --select-padding: 0;
   --select-margin: 0;
-  --select-selected-padding: 0 var(--spacer-xs);
+  --select-padding: 0;
   --select-selected-justify-content: center;
+  --select-selected-padding: 0 var(--spacer-xs);
+  max-height: var(--top-bar-height, 2.5rem);
   text-align: center;
-  cursor: pointer;
+
+  .sf-select {
+    cursor: pointer;
+  }
 }
 </style>

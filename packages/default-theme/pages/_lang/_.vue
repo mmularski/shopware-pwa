@@ -8,24 +8,23 @@ import { useCms } from "@shopware-pwa/composables"
 import languagesMap from "sw-plugins/languages"
 
 const pagesMap = {
-  "frontend.navigation.page": "CategoryView",
-  "frontend.detail.page": "ProductView",
+  "frontend.navigation.page": () =>
+    import("@shopware-pwa/default-theme/components/views/CategoryView"),
+  "frontend.detail.page": () =>
+    import("@shopware-pwa/default-theme/components/views/ProductView"),
 }
 
 export function getComponentBy(resourceType) {
   if (!resourceType || !pagesMap[resourceType]) return
-  let componentName = pagesMap[resourceType]
-  if (!componentName) componentName = "SwNoComponent"
-  return () =>
-    import(`@shopware-pwa/default-theme/components/views/${componentName}`)
+  return pagesMap[resourceType]
 }
 
 export default {
   name: "DynamicRoute",
   components: {},
   watchQuery: true,
-  asyncData: async ({ req, params, query, error: errorView, store }) => {
-    const { search, page, error } = useCms()
+  asyncData: async ({ params, app, error: errorView, query }) => {
+    const { search, page, error } = useCms(app)
     let path = params.pathMatch
     const lang = params.lang
     if (lang && !languagesMap[lang]) {

@@ -1,9 +1,12 @@
 <template>
   <div class="layout">
     <SwPluginSlot name="page-top" />
+
     <SwHeader />
+
     <SwPluginSlot name="top-header-after" />
-    <SwPluginSlot name="breadcrumbs">
+
+    <SwPluginSlot name="breadcrumbs" :slot-context="getBreadcrumbs">
       <SfBreadcrumbs
         v-show="getBreadcrumbs.length > 0"
         :breadcrumbs="getBreadcrumbs"
@@ -11,6 +14,7 @@
         @click="redirectTo"
       />
     </SwPluginSlot>
+
     <nuxt />
     <SwCart v-if="isSidebarOpen" />
     <SwPluginSlot name="footer-before" />
@@ -32,12 +36,7 @@ import SwBottomNavigation from "@shopware-pwa/default-theme/components/SwBottomN
 import SwFooter from "@shopware-pwa/default-theme/components/SwFooter"
 import SwPluginSlot from "sw-plugins/SwPluginSlot"
 import { useCms, useUIState } from "@shopware-pwa/composables"
-import {
-  computed,
-  getCurrentInstance,
-  ref,
-  watchEffect,
-} from "@vue/composition-api"
+import { computed, ref, watchEffect } from "@vue/composition-api"
 import SwLoginModal from "@shopware-pwa/default-theme/components/modals/SwLoginModal"
 const SwCart = () => import("@shopware-pwa/default-theme/components/SwCart")
 
@@ -51,14 +50,14 @@ export default {
     SwPluginSlot,
     SwLoginModal,
   },
-  setup() {
-    const vm = getCurrentInstance()
-    const { getBreadcrumbsObject } = useCms()
-    const { isOpen: isSidebarOpen } = useUIState("CART_SIDEBAR_STATE")
+
+  setup(props, { root }) {
+    const { getBreadcrumbsObject } = useCms(root)
+    const { isOpen: isSidebarOpen } = useUIState(root, "CART_SIDEBAR_STATE")
     const {
       isOpen: isLoginModalOpen,
       switchState: switchLoginModalState,
-    } = useUIState("LOGIN_MODAL_STATE")
+    } = useUIState(root, "LOGIN_MODAL_STATE")
 
     // Load cart component only when needed
     const loadSidebarComponent = ref(isSidebarOpen.value)
@@ -69,14 +68,30 @@ export default {
       }
     })
 
-    const getBreadcrumbs = computed(() =>
-      Object.values(getBreadcrumbsObject.value).map((breadcrumb) => ({
-        text: breadcrumb.name,
-        route: {
-          link: vm.$i18n.path(breadcrumb.path),
-        },
-      }))
-    )
+    const getBreadcrumbs = computed(() => {
+      const breadcrumbs = Object.values(getBreadcrumbsObject.value).map(
+        (breadcrumb) => ({
+          text: breadcrumb.name,
+          link: root.$i18n.path(breadcrumb.path),
+          route: {
+            link: root.$i18n.path(breadcrumb.path),
+          },
+        })
+      )
+
+      if (breadcrumbs.length > 0) {
+        breadcrumbs.unshift({
+          text: root.$t("Home"),
+          link: root.$i18n.path("/"),
+          route: {
+            link: root.$i18n.path("/"),
+          },
+        })
+      }
+
+      return breadcrumbs
+    })
+
     return {
       getBreadcrumbs,
       isSidebarOpen: loadSidebarComponent,
@@ -84,6 +99,7 @@ export default {
       switchLoginModalState,
     }
   },
+
   methods: {
     redirectTo(route) {
       return this.$router.push(this.$i18n.path(route.link))
@@ -121,6 +137,7 @@ export default {
 }
 
 .sw-breadcrumbs {
-  padding: 0 var(--spacer-xl) var(--spacer-base) var(--spacer-xl);
+  box-sizing: border-box;
+  padding: 1rem;
 }
 </style>

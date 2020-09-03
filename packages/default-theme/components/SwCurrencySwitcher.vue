@@ -3,41 +3,44 @@
   <div
     v-if="activeCurrency && availableCurrencies.length > 1"
     class="sw-currency"
+    data-cy="currency-switcher"
   >
     <SfSelect
       v-model="activeCurrency"
       :size="availableCurrencies.length"
       class="sw-currency__select sf-select--no-chevron"
+      data-cy="currency-switcher-select"
       @click="loadAvailableCurrencies"
     >
       <SfSelectOption
         v-for="currencyItem in availableCurrencies"
         :key="currencyItem.id"
         :value="currencyItem.id"
+        data-cy="currency-switcher-option"
+        >{{ currencyItem.symbol }}</SfSelectOption
       >
-        {{ currencyItem.symbol }}
-      </SfSelectOption>
     </SfSelect>
   </div>
 </template>
 <script>
-import { SfSelect, SfProductOption } from "@storefront-ui/vue"
+import { SfSelect } from "@storefront-ui/vue"
 import { useCurrency } from "@shopware-pwa/composables"
-import { computed, onMounted, getCurrentInstance } from "@vue/composition-api"
+import { computed, onMounted } from "@vue/composition-api"
 
 export default {
   name: "SwCurrencySwitcher",
+
   components: {
     SfSelect,
   },
-  setup(context) {
+
+  setup(props, { root }) {
     const {
       currency,
       setCurrency,
       loadAvailableCurrencies,
       availableCurrencies,
-    } = useCurrency()
-    const vm = getCurrentInstance()
+    } = useCurrency(root)
 
     // TODO: loaded on mounted only untill fixed issue: https://github.com/DivanteLtd/storefront-ui/issues/1097
     onMounted(async () => {
@@ -48,8 +51,8 @@ export default {
       get: () => currency.value && currency.value.id,
       set: async (id) => {
         await setCurrency({ id })
-        vm.$router.push({
-          query: { ...vm.$router.currentRoute.query, currencyId: id },
+        root.$router.push({
+          query: { ...root.$router.currentRoute.query, currencyId: id },
         })
       },
     })
@@ -61,15 +64,20 @@ export default {
   },
 }
 </script>
+
 <style lang="scss" scoped>
 @import "@/assets/scss/variables";
 
 .sw-currency {
-  --select-padding: 0;
   --select-margin: 0;
-  --select-selected-padding: 0 var(--spacer-xs);
+  --select-padding: 0;
   --select-selected-justify-content: center;
+  --select-selected-padding: 0 var(--spacer-xs);
   text-align: center;
-  cursor: pointer;
+
+  .sf-select {
+    cursor: pointer;
+    max-height: var(--top-bar-height, 2.5rem);
+  }
 }
 </style>

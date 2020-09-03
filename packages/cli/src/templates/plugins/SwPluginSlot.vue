@@ -1,5 +1,7 @@
 <template>
-  <component :is="getComponent" :name="name"> <slot /> </component>
+  <component :is="getComponent" :name="name" :slotContext="slotContext">
+    <slot />
+  </component>
 </template>
 <script>
 import Vue from "vue"
@@ -26,9 +28,13 @@ export default {
       type: String,
       default: "",
     },
+    slotContext: {
+      type: Object | Array | String,
+      default: null
+    }
   },
-  setup() {
-    const { showPluginSlots } = usePlugins();
+  setup(props, {root}) {
+    const { showPluginSlots } = usePlugins(root);
     return {
       showPluginSlots,
     };

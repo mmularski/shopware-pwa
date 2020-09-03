@@ -2,6 +2,8 @@ import Vue from "vue";
 import { computed, Ref, ref, reactive, onMounted } from "@vue/composition-api";
 import { getAvailableCountries } from "@shopware-pwa/shopware-6-client";
 import { ClientApiError } from "@shopware-pwa/commons/interfaces/errors/ApiError";
+import { getApplicationContext } from "@shopware-pwa/composables";
+import { ApplicationVueContext } from "../appContext";
 
 /**
  * @alpha
@@ -20,13 +22,16 @@ const sharedCountries = Vue.observable({
 /**
  * @alpha
  */
-export const useCountries = (): UseCountries => {
+export const useCountries = (
+  rootContext: ApplicationVueContext
+): UseCountries => {
+  const { apiInstance } = getApplicationContext(rootContext, "useCountries");
   const localCountries = reactive(sharedCountries);
   const error: Ref<any> = ref(null);
 
   const fetchCountries = async (): Promise<void> => {
     try {
-      const fetchCountries = await getAvailableCountries();
+      const fetchCountries = await getAvailableCountries(apiInstance);
       sharedCountries.countries = fetchCountries.data;
     } catch (e) {
       const err: ClientApiError = e;

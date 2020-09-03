@@ -1,13 +1,14 @@
 <template>
   <div v-if="product" id="product">
-    <SwPluginSlot name="product-page-details-before" />
+    <SwPluginSlot name="product-page-details-before" :slot-context="product" />
+    <SwGoBackArrow class="product-page-back" />
     <div class="product">
       <SwProductGallery :product="product" class="product__gallery" />
       <div class="product__description">
         <SwProductDetails :product="product" :page="page" />
       </div>
     </div>
-    <SwPluginSlot name="product-page-details-after" />
+    <SwPluginSlot name="product-page-details-after" :slot-context="product" />
     <div class="products__recomendations">
       <div class="products-recomendations__section">
         <SwProductCarousel />
@@ -51,6 +52,7 @@
 <script>
 import { SfImage, SfSection } from "@storefront-ui/vue"
 import { useProduct } from "@shopware-pwa/composables"
+import SwGoBackArrow from "@shopware-pwa/default-theme/components/atoms/SwGoBackArrow"
 import SwProductGallery from "@shopware-pwa/default-theme/components/SwProductGallery"
 import SwProductDetails from "@shopware-pwa/default-theme/components/SwProductDetails"
 import SwProductCarousel from "@shopware-pwa/default-theme/components/SwProductCarousel"
@@ -60,6 +62,7 @@ import SwPluginSlot from "sw-plugins/SwPluginSlot"
 export default {
   name: "Product",
   components: {
+    SwGoBackArrow,
     SfImage,
     SfSection,
     SwProductGallery,
@@ -76,7 +79,7 @@ export default {
   },
   data() {
     return {
-      productWithAssociations: null,
+      productWithChildren: null,
       relatedProducts: [],
       selectedSize: null,
       selectedColor: null,
@@ -84,26 +87,21 @@ export default {
   },
   computed: {
     product() {
-      return this.productWithAssociations
-        ? this.productWithAssociations.value
+      return this.productWithChildren
+        ? this.productWithChildren.value
         : this.page.product
     },
   },
+  // load children association from the parent - variants loading
   async mounted() {
-    // TODO remove when page resolver is fully done
-    const associations = {
-      "associations[media][]": true,
-      "associations[options][associations][group][]": true,
-      "associations[properties][associations][group][]": true,
-      "associations[productReviews][]": true, // can be fetched asynchronously
-      "associations[manufacturer][]": true,
-      "associations[children][associations][options][associations][group][]": true,
-      "associations[children][associations][seoUrls][]": true,
+    if (!this.page.product.parentId) {
+      return
     }
+
     try {
-      const { loadAssociations, product } = useProduct(this.page.product)
-      this.productWithAssociations = product
-      await loadAssociations(associations)
+      const { loadAssociations, product } = useProduct(this, this.page.product)
+      this.productWithChildren = product
+      await loadAssociations()
     } catch (e) {
       console.error("ProductView:mounted:loadAssociations", e)
     }
@@ -120,6 +118,8 @@ export default {
 }
 
 #product {
+  position: relative;
+
   @include for-desktop {
     max-width: 1240px;
     margin: auto;
@@ -167,5 +167,11 @@ export default {
       margin-left: calc(var(--spacer-base) * 3);
     }
   }
+}
+.product-page-back {
+  left: 0.5rem;
+  position: absolute;
+  top: 1.5rem;
+  z-index: 4;
 }
 </style>

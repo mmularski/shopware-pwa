@@ -5,11 +5,11 @@
       :visible="isSidebarOpen"
       :heading-title="$t('My cart')"
       class="sf-sidebar--right"
-      @close="toggleSidebar"
+      @close="toggleSidebar(false)"
     >
       <template v-if="count" #content-top>
         <SfProperty
-          class="my-cart__total-items sf-property--large"
+          class="my-cart__total-items"
           :name="$t('Total items')"
           :value="count"
         />
@@ -58,6 +58,7 @@
             <SwButton
               class="sf-button--full-width color-secondary"
               @click="goToCheckout()"
+              data-cy="goToCheckout-button"
               >{{ $t("Go to checkout") }}</SwButton
             >
             <SwPluginSlot name="sidecart-checkout-button-after" />
@@ -65,7 +66,7 @@
           <div v-else>
             <SwButton
               class="sf-button--full-width color-primary"
-              @click="toggleSidebar"
+              @click="toggleSidebar()"
             >
               {{ $t("Start shopping") }}
             </SwButton>
@@ -102,9 +103,10 @@ export default {
     SwPluginSlot,
     SwButton,
   },
-  setup() {
-    const { cartItems, count, totalPrice, removeProduct } = useCart()
+  setup(props, { root }) {
+    const { cartItems, count, totalPrice, removeProduct } = useCart(root)
     const { isOpen: isSidebarOpen, switchState: toggleSidebar } = useUIState(
+      root,
       "CART_SIDEBAR_STATE"
     )
 
@@ -137,14 +139,26 @@ export default {
 <style lang="scss" scoped>
 @import "@/assets/scss/variables";
 
+::v-deep .sf-sidebar__aside {
+  height: auto;
+}
+
 .sw-side-cart {
-  --sidebar-z-index: 4;
-  --overlay-z-index: 4;
+  --sidebar-z-index: 1;
+  --property-name-font-size: var(--font-lg);
+  --property-value-font-size: var(--font-lg);
+  --sidebar-bottom: var(--bottom-navigation-height, 0);
+  --overlay-z-index: 0;
+  --sidebar-bottom-padding: var(--spacer-sm) var(--spacer-sm) var(--spacer-xl);
+
   & > * {
     --sidebar-content-padding: 0 var(--spacer-xs) var(--spacer-xs)
       var(--spacer-xs);
   }
   @include for-desktop {
+    --sidebar-z-index: 4;
+    --overlay-z-index: 4;
+    --sidebar-bottom: 0;
     & > * {
       --sidebar-bottom-padding: var(--spacer-base);
       --sidebar-content-padding: 0 var(--spacer-base) var(--spacer-base)
@@ -159,7 +173,7 @@ export default {
   &__total-items {
     margin: var(--spacer-xs) 0;
     @include for-desktop {
-      margin: var(--spacer-xs) 0 0 0;
+      margin: var(--spacer-xl) 0 var(--spacer-lg) 0;
     }
   }
   &__total-price {

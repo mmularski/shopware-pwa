@@ -7,6 +7,7 @@
         class="sw-login__alert"
         type="danger"
         :message="userError"
+        data-cy="login-alert"
       />
       <SwInput
         v-model="email"
@@ -17,6 +18,7 @@
         :disabled="isLoading"
         error-message="Email is required"
         @blur="$v.email.$touch()"
+        data-cy="email-input"
       />
       <SwInput
         v-model="password"
@@ -28,12 +30,14 @@
         :disabled="isLoading"
         error-message="Password is required"
         @blur="$v.password.$touch()"
+        data-cy="password-input"
       />
       <SwPluginSlot name="login-form-button">
         <SwButton
           class="sf-button--full-width form__button"
           :disabled="isLoading"
           @click="invokeLogin"
+          data-cy="submit-login-button"
         >
           Log in
         </SwButton>
@@ -48,8 +52,8 @@ import { validationMixin } from "vuelidate"
 import { required, email } from "vuelidate/lib/validators"
 import { useUser } from "@shopware-pwa/composables"
 import SwPluginSlot from "sw-plugins/SwPluginSlot"
-import SwButton from "@shopware-pwa/default-theme/components/atoms/SwButton"
-import SwInput from "@shopware-pwa/default-theme/components/atoms/SwInput"
+import SwButton from "@/components/atoms/SwButton"
+import SwInput from "@/components/atoms/SwInput"
 
 export default {
   name: "SwLogin",
@@ -61,8 +65,8 @@ export default {
       password: "",
     }
   },
-  setup() {
-    const { login, loading, error: userError } = useUser()
+  setup(props, { root }) {
+    const { login, loading, error: userError } = useUser(root)
     return {
       clientLogin: login,
       isLoading: loading,

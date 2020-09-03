@@ -1,5 +1,5 @@
 <template>
-  <div class="sw-address" v-if="address">
+  <div v-if="address" class="sw-address">
     <div class="sw-address__content">
       <h4 class="sw-address__title">{{ addressTitle }}</h4>
       <slot name="before-content" />
@@ -7,7 +7,7 @@
         {{ street }} {{ apartment }}, {{ zipcode }}<br />
         {{ city }}
       </p>
-      <p class="content" v-if="phoneNumber">
+      <p v-if="phoneNumber" class="content">
         {{ phoneNumber }}
       </p>
     </div>
@@ -54,8 +54,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import "~@storefront-ui/vue/styles";
-
 .sw-address {
   display: flex;
   justify-content: space-between;

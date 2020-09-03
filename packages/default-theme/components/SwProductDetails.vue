@@ -1,41 +1,42 @@
 <template>
   <div class="sw-product-details">
     <div class="product-details__mobile-top">
-      <SwProductHeading
-        class="product-details__heading"
-        :name="name"
-        :reviews="reviews"
-        :rating-average="ratingAverage"
-        :special="getSpecialPrice | price"
-        :price="getPrice | price"
-        :tier-prices="getTierPrices"
-      />
+      <SwProductHeading class="product-details__heading" :product="product" />
     </div>
-    <SwPluginSlot name="product-page-description">
-      <p
-        class="product-details__description desktop-only"
-        v-html="description"
-      />
+
+    <SwPluginSlot name="product-page-description" :slot-context="product">
+      <p class="product-details__description" v-html="description" />
     </SwPluginSlot>
+
     <!-- <div class="product-details__action">
       <button v-if="sizes.length > 0" class="sf-action">Size guide</button>
-    </div> -->
-    <div v-if="hasChildren" class="product-details__section">
-      <div v-for="productType in getAllProductOptionsTypes" :key="productType">
-        <SwProductColors
-          v-if="productType === 'color'"
-          :colors="getAllProductOptions[productType]"
-          :value="selected[productType]"
-          @input="handleChange(productType, $event)"
-          label="Color:"
-        />
-        <SwProductSelect
-          v-else
-          :value="selected[productType]"
-          :options="getAllProductOptions[productType]"
-          @change="handleChange(productType, $event)"
-          :label="productType"
-        />
+    </div>-->
+    <div
+      class="product-details-wrapper"
+      :class="{ 'product-details-wrapper__loaded': hasChildren }"
+    >
+      <div v-if="hasChildren" class="product-details__section">
+        <div
+          v-for="productType in getAllProductOptionsTypes"
+          :key="productType"
+        >
+          <SwProductColors
+            v-if="
+              getAllProductOptions[productType].find(({ color }) => !!color)
+            "
+            :colors="getAllProductOptions[productType]"
+            :value="selected[productType]"
+            :label="productType"
+            @input="handleChange(productType, $event)"
+          />
+          <SwProductSelect
+            v-else
+            :value="selected[productType]"
+            :options="getAllProductOptions[productType]"
+            :label="productType"
+            @change="handleChange(productType, $event)"
+          />
+        </div>
       </div>
     </div>
     <div class="product-details__section">
@@ -50,51 +51,47 @@
         class="product-details__add-to-cart"
         @click="addToCart"
       />
-      <SwPluginSlot name="product-page-add-to-cart-button-after" />
-      <div class="product-details__action desktop-only">
-        <SwButton class="sf-button--text product-details__action-button"
-          >Save for later</SwButton
-        >
-        <SwButton class="sf-button--text product-details__action-button"
-          >Add to compare</SwButton
-        >
+      <SwPluginSlot
+        name="product-page-add-to-cart-button-after"
+        :slot-context="product"
+      />
+      <div
+        v-if="getProductNumber(product)"
+        class="product-details__product-number"
+      >
+        <p>
+          Product number: <span>{{ getProductNumber(product) }}</span>
+        </p>
       </div>
     </div>
     <SwProductTabs
-      :description="description"
       :properties="properties"
       :reviews="reviews"
-      :manufacturer="product.manufacturer"
+      :manufacturer="manufacturer"
     />
   </div>
 </template>
 <script>
-import { SfAlert, SfProductOption, SfAddToCart } from "@storefront-ui/vue"
+import { SfAlert, SfAddToCart } from "@storefront-ui/vue"
 import {
-  getProductProperties,
-  getProductOption,
-  getProductReviews,
-  getProductRegularPrice,
-  getProductSpecialPrice,
-  isProductSimple,
-  getProductOptionsUrl,
+  getProductNumber,
   getProductOptions,
-  getProductTierPrices,
+  getProductOptionsUrl,
+  getProductProperties,
+  getProductReviews,
 } from "@shopware-pwa/helpers"
-import { useProduct, useAddToCart } from "@shopware-pwa/composables"
+import { useAddToCart } from "@shopware-pwa/composables"
 import SwProductHeading from "@shopware-pwa/default-theme/components/SwProductHeading"
 import SwProductSelect from "@shopware-pwa/default-theme/components/SwProductSelect"
 import SwProductColors from "@shopware-pwa/default-theme/components/SwProductColors"
 import SwPluginSlot from "sw-plugins/SwPluginSlot"
-import SwButton from "@shopware-pwa/default-theme/components/atoms/SwButton"
 
 import SwProductTabs from "@shopware-pwa/default-theme/components/SwProductTabs"
 export default {
   name: "SwProductDetails",
+
   components: {
     SfAlert,
-    SwButton,
-    SfProductOption,
     SfAddToCart,
     SwProductHeading,
     SwProductSelect,
@@ -117,31 +114,16 @@ export default {
       selected: {},
     }
   },
-  setup({ page }) {
-    const { addToCart, quantity } = useAddToCart(page && page.product)
+  setup({ page }, { root }) {
+    const { addToCart, quantity } = useAddToCart(root, page && page.product)
 
     return {
       quantity,
       addToCart,
     }
   },
+
   computed: {
-    getPrice() {
-      return getProductRegularPrice(this.product)
-    },
-    getSpecialPrice() {
-      return getProductSpecialPrice(this.product)
-    },
-    getTierPrices() {
-      return getProductTierPrices(this.product)
-    },
-    name() {
-      return (
-        this.product &&
-        (this.product.name ||
-          (this.product.translated && this.product.translated.name))
-      )
-    },
     description() {
       return (
         this.product &&
@@ -149,17 +131,16 @@ export default {
           (this.product.translated && this.product.translated.description))
       )
     },
-    ratingAverage() {
-      return this.product && this.product.ratingAverage
-    },
     hasChildren() {
       return (
         this.product && this.product.children && this.product.children.length
       )
     },
+
     properties() {
       return getProductProperties({ product: this.product })
     },
+
     // TODO: move to helpers
     getAllProductOptions() {
       const options = getProductOptions({
@@ -167,15 +148,22 @@ export default {
       })
       return options
     },
+
     getAllProductOptionsTypes() {
       return this.getAllProductOptions && Object.keys(this.getAllProductOptions)
+    },
+
+    manufacturer() {
+      return this.product && this.product.manufacturer
     },
     reviews() {
       return getProductReviews({ product: this.product })
     },
+
     stock() {
       return this.product && this.product.stock
     },
+
     selectedOptions() {
       return this.selected
     },
@@ -214,9 +202,12 @@ export default {
     toggleWishlist(index) {
       this.products[index].isOnWishlist = !this.products[index].isOnWishlist
     },
+
     handleChange(attribute, option) {
       this.selected = Object.assign({}, this.selected, { [attribute]: option })
     },
+
+    getProductNumber,
   },
 }
 </script>
@@ -227,6 +218,18 @@ export default {
 @mixin for-iOS {
   @supports (-webkit-overflow-scrolling: touch) {
     @content;
+  }
+}
+.product-details-wrapper {
+  @include for-desktop {
+    height: 0;
+    transition: height 0.66s ease-out;
+  }
+
+  &__loaded {
+    @include for-desktop {
+      height: auto;
+    }
   }
 }
 
@@ -253,7 +256,7 @@ export default {
     margin-bottom: var(--spacer-base);
   }
   &__description {
-    margin: var(--spacer-xl) 0 calc(var(--spacer-base) * 3) 0;
+    margin: var(--spacer-xl) 0;
     font-family: var(--font-family-secondary);
     font-size: var(--font-sm);
   }
@@ -284,12 +287,25 @@ export default {
       display: block;
     }
   }
+  &__product-number {
+    p {
+      font-size: var(--font-sm);
+      font-weight: bold;
+
+      span {
+        font-weight: var(--font-light);
+      }
+    }
+  }
   &__section {
     padding-bottom: 10px;
     padding-top: 20px;
     @include for-desktop {
       padding-bottom: 0;
     }
+    // &-attributes {
+    //   height: 50px;
+    // }
   }
   &__review {
     padding-bottom: var(--spacer-base);

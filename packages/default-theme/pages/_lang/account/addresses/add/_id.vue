@@ -1,23 +1,23 @@
 <template>
   <div class="addresses-add">
     <div v-if="address !== ''">
-      <SwAddress :address="address" />
+      <SwAddressForm :address="address" />
     </div>
   </div>
 </template>
 
 <script>
-import SwAddress from "@shopware-pwa/default-theme/components/forms/SwAddress.vue"
+import SwAddressForm from "@shopware-pwa/default-theme/components/forms/SwAddressForm.vue"
 import { useUser } from "@shopware-pwa/composables"
 
 export default {
-  components: { SwAddress },
+  components: { SwAddressForm },
   data() {
     return {
       address: "",
     }
   },
-  setup() {
+  setup(props, { root }) {
     const {
       addresses,
       loadAddresses,
@@ -25,7 +25,7 @@ export default {
       loadCountry,
       salutation,
       loadSalutation,
-    } = useUser()
+    } = useUser(root)
     return {
       loadAddresses,
       addresses,
@@ -53,4 +53,15 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+@import "@/assets/scss/variables";
+
+.addresses-add {
+  box-sizing: border-box;
+  width: 100%;
+
+  @include for-mobile {
+    padding: var(--spacer-sm);
+  }
+}
+</style>

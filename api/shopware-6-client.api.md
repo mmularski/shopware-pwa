@@ -4,6 +4,8 @@
 
 ```ts
 
+import { Aggregation } from '@shopware-pwa/commons/interfaces/search/Aggregation';
+import { AxiosInstance } from 'axios';
 import { Cart } from '@shopware-pwa/commons/interfaces/models/checkout/cart/Cart';
 import { Category } from '@shopware-pwa/commons/interfaces/models/content/category/Category';
 import { CmsPage } from '@shopware-pwa/commons/interfaces/models/content/cms/CmsPage';
@@ -13,40 +15,34 @@ import { Currency } from '@shopware-pwa/commons/interfaces/models/system/currenc
 import { Customer } from '@shopware-pwa/commons/interfaces/models/checkout/customer/Customer';
 import { CustomerAddress } from '@shopware-pwa/commons/interfaces/models/checkout/customer/CustomerAddress';
 import { CustomerRegistrationParams } from '@shopware-pwa/commons/interfaces/request/CustomerRegistrationParams';
-import { EqualsAnyFilter } from '@shopware-pwa/commons/interfaces/search/SearchFilter';
-import { EqualsFilter } from '@shopware-pwa/commons/interfaces/search/SearchFilter';
-import { Grouping } from '@shopware-pwa/commons/interfaces/search/Grouping';
 import { GuestOrderParams } from '@shopware-pwa/commons/interfaces/request/GuestOrderParams';
 import { Language } from '@shopware-pwa/commons/interfaces/models/framework/language/Language';
-import { MultiFilter } from '@shopware-pwa/commons/interfaces/search/SearchFilter';
 import { NavigationResponse } from '@shopware-pwa/commons/interfaces/models/content/navigation/Navigation';
-import { NotFilter } from '@shopware-pwa/commons/interfaces/search/SearchFilter';
 import { Order } from '@shopware-pwa/commons/interfaces/models/checkout/order/Order';
 import { PaymentMethod } from '@shopware-pwa/commons/interfaces/models/checkout/payment/PaymentMethod';
 import { Product } from '@shopware-pwa/commons/interfaces/models/content/product/Product';
 import { ProductListingResult } from '@shopware-pwa/commons/interfaces/response/ProductListingResult';
-import { RangeFilter } from '@shopware-pwa/commons/interfaces/search/SearchFilter';
 import { Salutation } from '@shopware-pwa/commons/interfaces/models/system/salutation/Salutation';
 import { SearchCriteria } from '@shopware-pwa/commons/interfaces/search/SearchCriteria';
 import { SearchResult } from '@shopware-pwa/commons/interfaces/response/SearchResult';
 import { SessionContext } from '@shopware-pwa/commons/interfaces/response/SessionContext';
 import { ShippingMethod } from '@shopware-pwa/commons/interfaces/models/checkout/shipping/ShippingMethod';
-import { ShopwareAssociation } from '@shopware-pwa/commons/interfaces/search/Association';
+import { StoreNavigationElement } from '@shopware-pwa/commons/interfaces/models/content/navigation/Navigation';
+
+// @beta @deprecated
+export function addCartItemQuantity(itemId: string, quantity: number, contextInstance?: ShopwareApiInstance): Promise<Cart>;
+
+// @beta
+export function addProductToCart(productId: string, quantity?: number, contextInstance?: ShopwareApiInstance): Promise<Cart>;
 
 // @alpha
-export function addCartItemQuantity(itemId: string, quantity: number): Promise<Cart>;
+export function addPromotionCode(promotionCode: string, contextInstance?: ShopwareApiInstance): Promise<Cart>;
+
+// @beta
+export function changeCartItemQuantity(itemId: string, newQuantity?: number, contextInstance?: ShopwareApiInstance): Promise<Cart>;
 
 // @alpha
-export function addProductToCart(productId: string, quantity?: number): Promise<Cart>;
-
-// @alpha
-export function addPromotionCode(promotionCode: string): Promise<Cart>;
-
-// @alpha
-export function changeCartItemQuantity(itemId: string, newQuantity?: number): Promise<Cart>;
-
-// @alpha
-export function clearCart(): Promise<ContextTokenResponse>;
+export function clearCart(contextInstance?: ShopwareApiInstance): Promise<ContextTokenResponse>;
 
 // @beta (undocumented)
 export interface ClientSettings {
@@ -73,18 +69,35 @@ export interface ConfigChangedArgs {
     config: ClientSettings;
 }
 
-// @alpha
-export function createCustomerAddress(params: CustomerAddressParam): Promise<string>;
-
-// @alpha
-export function createGuestOrder(params: GuestOrderParams): Promise<Order>;
-
-// @alpha
-export function createOrder(): Promise<Order>;
-
-// @alpha (undocumented)
-export interface CustomerAddressParam extends Partial<CustomerAddress> {
+// @beta (undocumented)
+export interface ContactFormData {
+    // (undocumented)
+    comment: string;
+    // (undocumented)
+    email: string;
+    // (undocumented)
+    firstName: string;
+    // (undocumented)
+    lastName: string;
+    // (undocumented)
+    phone?: string;
+    // (undocumented)
+    salutationId: string;
+    // (undocumented)
+    subject: string;
 }
+
+// @alpha
+export function createCustomerAddress(params: Partial<CustomerAddress>, contextInstance?: ShopwareApiInstance): Promise<string>;
+
+// @alpha
+export function createGuestOrder(params: GuestOrderParams, contextInstance?: ShopwareApiInstance): Promise<Order>;
+
+// @beta (undocumented)
+export function createInstance(initialConfig?: ClientSettings): ShopwareApiInstance;
+
+// @alpha
+export function createOrder(contextInstance?: ShopwareApiInstance): Promise<Order>;
 
 // @alpha (undocumented)
 export interface CustomerRegisterResponse {
@@ -133,55 +146,55 @@ export interface CustomerUpdateProfileParam {
 }
 
 // @alpha
-export function deleteCustomerAddress(addressId: string): Promise<void>;
+export function deleteCustomerAddress(addressId: string, contextInstance?: ShopwareApiInstance): Promise<void>;
 
 // @alpha
-export function getAvailableCountries(): Promise<SearchResult<Country[]>>;
+export function getAvailableCountries(contextInstance?: ShopwareApiInstance): Promise<SearchResult<Country[]>>;
 
 // @alpha (undocumented)
-export function getAvailableCurrencies(): Promise<Currency[]>;
+export function getAvailableCurrencies(contextInstance?: ShopwareApiInstance): Promise<Currency[]>;
 
 // @alpha (undocumented)
-export function getAvailableLanguages(): Promise<Language[]>;
+export function getAvailableLanguages(contextInstance?: ShopwareApiInstance): Promise<Language[]>;
 
 // @alpha (undocumented)
-export function getAvailablePaymentMethods(): Promise<PaymentMethod[]>;
+export function getAvailablePaymentMethods(contextInstance?: ShopwareApiInstance): Promise<PaymentMethod[]>;
 
 // @alpha
-export function getAvailableSalutations(): Promise<SearchResult<Salutation[]>>;
+export function getAvailableSalutations(contextInstance?: ShopwareApiInstance): Promise<SearchResult<Salutation[]>>;
 
 // @alpha (undocumented)
-export function getAvailableShippingMethods(): Promise<ShippingMethod[]>;
-
-// @alpha
-export function getCart(): Promise<Cart>;
-
-// @alpha (undocumented)
-export function getCategories(searchCriteria?: SearchCriteria): Promise<SearchResult<Category[]>>;
-
-// @alpha (undocumented)
-export function getCategory(categoryId: string): Promise<Category>;
-
-// @alpha
-export const getCategoryProductsListing: (categoryId: string, searchCriteria?: SearchCriteria | undefined) => Promise<ProductListingResult>;
+export function getAvailableShippingMethods(contextInstance?: ShopwareApiInstance): Promise<ShippingMethod[]>;
 
 // @beta
-export function getCustomer(): Promise<Customer | null>;
+export function getCart(contextInstance?: ShopwareApiInstance): Promise<Cart>;
 
-// @alpha
-export function getCustomerAddress(addressId: string): Promise<CustomerAddress>;
-
-// @beta
-export function getCustomerAddresses(): Promise<CustomerAddress[]>;
-
-// @alpha
-export function getCustomerOrderDetails(orderId: string): Promise<Order | undefined>;
-
-// @beta
-export function getCustomerOrders(): Promise<Order[]>;
+// @alpha @deprecated (undocumented)
+export function getCategories(searchCriteria?: SearchCriteria, contextInstance?: ShopwareApiInstance): Promise<SearchResult<Category[]>>;
 
 // @alpha (undocumented)
-export function getNavigation(params: GetNavigationParams): Promise<NavigationResponse>;
+export function getCategory(categoryId: string, contextInstance?: ShopwareApiInstance): Promise<Category>;
+
+// @alpha
+export const getCategoryProductsListing: (categoryId: string, searchCriteria?: SearchCriteria | undefined, contextInstance?: ShopwareApiInstance) => Promise<ProductListingResult>;
+
+// @beta
+export function getCustomer(contextInstance?: ShopwareApiInstance): Promise<Customer | null>;
+
+// @alpha
+export function getCustomerAddress(addressId: string, contextInstance?: ShopwareApiInstance): Promise<CustomerAddress>;
+
+// @beta
+export function getCustomerAddresses(contextInstance?: ShopwareApiInstance): Promise<CustomerAddress[]>;
+
+// @alpha
+export function getCustomerOrderDetails(orderId: string, contextInstance?: ShopwareApiInstance): Promise<Order | undefined>;
+
+// @beta
+export function getCustomerOrders(contextInstance?: ShopwareApiInstance): Promise<Order[]>;
+
+// @alpha (undocumented)
+export function getNavigation(params: GetNavigationParams, contextInstance?: ShopwareApiInstance): Promise<NavigationResponse>;
 
 // @alpha (undocumented)
 export interface GetNavigationParams {
@@ -195,68 +208,145 @@ export interface GetNavigationParams {
 export function getOrderPaymentUrl({ orderId, finishUrl, }: {
     orderId: string;
     finishUrl?: string;
-}): Promise<{
+}, contextInstance?: ShopwareApiInstance): Promise<{
     paymentUrl: string;
 }>;
 
 // @alpha (undocumented)
-export function getPage(path: string, searchCriteria?: SearchCriteria): Promise<PageResolverResult<CmsPage>>;
+export function getPage(path: string, searchCriteria?: SearchCriteria, contextInstance?: ShopwareApiInstance): Promise<PageResolverResult<CmsPage>>;
 
 // @alpha (undocumented)
-export function getPaymentMethodDetails(paymentId: string): Promise<PaymentMethod>;
+export function getPaymentMethodDetails(paymentId: string, contextInstance?: ShopwareApiInstance): Promise<PaymentMethod>;
 
 // @alpha
-export function getProduct(productId: string, params?: any): Promise<Product>;
-
-// @alpha
-export const getProducts: (searchCriteria?: SearchCriteria | undefined) => Promise<SearchResult<Product[]>>;
-
-// @alpha
-export const getProductsIds: () => Promise<SearchResult<string[]>>;
+export function getProduct(productId: string, params?: any, contextInstance?: ShopwareApiInstance): Promise<Product>;
 
 // @beta (undocumented)
-export function getResults(term: string, searchCriteria?: SearchCriteria): Promise<ProductListingResult>;
+export function getProductPage(path: string, searchCriteria?: SearchCriteria, contextInstance?: ShopwareApiInstance): Promise<PageResolverProductResult>;
+
+// @alpha @deprecated
+export const getProducts: (searchCriteria?: SearchCriteria | undefined, contextInstance?: ShopwareApiInstance) => Promise<SearchResult<Product[]>>;
 
 // @alpha
-export function getSessionContext(): Promise<SessionContext>;
+export const getProductsIds: (options?: any, contextInstance?: ShopwareApiInstance) => Promise<SearchResult<string[]>>;
 
-// @alpha (undocumented)
-export function getShippingMethodDetails(shippingId: string): Promise<ShippingMethod>;
+// @beta @deprecated (undocumented)
+export function getResults(term: string, searchCriteria?: SearchCriteria, contextInstance?: ShopwareApiInstance): Promise<ProductListingResult>;
 
 // @beta (undocumented)
-export function getSuggestedResults(term: string, searchCriteria?: SearchCriteria): Promise<ProductListingResult>;
+export function getSearchResults(term: string, searchCriteria?: SearchCriteria, contextInstance?: ShopwareApiInstance): Promise<ProductListingResult>;
+
+// @alpha
+export function getSessionContext(contextInstance?: ShopwareApiInstance): Promise<SessionContext>;
 
 // @alpha (undocumented)
-export function getUserCountry(countryId: string): Promise<Country>;
+export function getShippingMethodDetails(shippingId: string, contextInstance?: ShopwareApiInstance): Promise<ShippingMethod>;
+
+// @beta (undocumented)
+export function getStoreNavigation({ requestActiveId, requestRootId, depth, buildTree, searchCriteria, }: GetStoreNavigationParams, contextInstance?: ShopwareApiInstance): Promise<StoreNavigationElement[]>;
+
+// @beta
+export interface GetStoreNavigationParams {
+    // (undocumented)
+    buildTree?: boolean;
+    // (undocumented)
+    depth?: number;
+    // (undocumented)
+    requestActiveId: "main-navigation" | "service-navigation" | "footer-navigation";
+    // (undocumented)
+    requestRootId: "main-navigation" | "service-navigation" | "footer-navigation";
+    // (undocumented)
+    searchCriteria?: SearchCriteria;
+}
 
 // @alpha (undocumented)
-export function getUserSalutation(salutationId: string): Promise<Salutation>;
+export function getStoreOrderPaymentUrl(orderId: string, contextInstance?: ShopwareApiInstance): Promise<{
+    redirectResponse: unknown;
+    apiAlias: string;
+}>;
+
+// @beta (undocumented)
+export function getSuggestedResults(term: string, searchCriteria?: SearchCriteria, contextInstance?: ShopwareApiInstance): Promise<ProductListingResult>;
+
+// @alpha (undocumented)
+export function getUserCountry(countryId: string, contextInstance?: ShopwareApiInstance): Promise<Country>;
+
+// @alpha (undocumented)
+export function getUserSalutation(salutationId: string, contextInstance?: ShopwareApiInstance): Promise<Salutation>;
 
 // @beta
 export function invokeGet({ address }: {
     address: string;
-}): Promise<any>;
+}, contextInstance?: ShopwareApiInstance): Promise<any>;
 
 // @beta
 export function invokePost({ address, payload, }: {
     address: string;
     payload?: any;
-}): Promise<any>;
+}, contextInstance?: ShopwareApiInstance): Promise<any>;
 
 // @beta
-export function login({ username, password, }?: {
+export function login({ username, password }?: {
     username?: string;
     password?: string;
-}): Promise<ContextTokenResponse>;
+}, contextInstance?: ShopwareApiInstance): Promise<ContextTokenResponse>;
 
 // @beta
-export function logout(): Promise<void>;
+export function logout(contextInstance?: ShopwareApiInstance): Promise<void>;
 
 // @beta (undocumented)
-export function onConfigChange(fn: (context: ConfigChangedArgs) => void): void;
+export function newsletterSubscribe(params: NewsletterSubscribeData, contextInstance?: ShopwareApiInstance): Promise<void>;
 
-// @alpha (undocumented)
+// @beta (undocumented)
+export interface NewsletterSubscribeData {
+    // (undocumented)
+    city?: string;
+    // (undocumented)
+    email: string;
+    // (undocumented)
+    firstName?: string;
+    // (undocumented)
+    lastName?: string;
+    // (undocumented)
+    option: string;
+    // (undocumented)
+    salutationId?: string;
+    // (undocumented)
+    storefrontUrl: string;
+    // (undocumented)
+    street?: string;
+    // (undocumented)
+    zipCode?: string;
+}
+
+// @beta (undocumented)
+export function newsletterUnsubscribe({ email, }: {
+    email: string;
+}, contextInstance?: ShopwareApiInstance): Promise<void>;
+
+// @beta (undocumented)
+export const onConfigChange: (fn: (context: ConfigChangedArgs) => void) => void;
+
+// @beta (undocumented)
+export interface PageResolverProductResult {
+    // (undocumented)
+    aggregations: Aggregation[];
+    // (undocumented)
+    apiAlias: string;
+    // (undocumented)
+    cannonicalPathInfo: string;
+    // (undocumented)
+    product: Partial<Product>;
+    // (undocumented)
+    resourceIdentifier: string;
+    // (undocumented)
+    resourceType: string;
+}
+
+// @beta (undocumented)
 export interface PageResolverResult<T> {
+    // (undocumented)
+    apiAlias: string;
     // (undocumented)
     breadcrumb: {
         [id: string]: {
@@ -267,82 +357,85 @@ export interface PageResolverResult<T> {
     // (undocumented)
     cmsPage: T;
     // (undocumented)
+    listingConfiguration: any;
+    // (undocumented)
     resourceIdentifier: string;
     // (undocumented)
     resourceType: string;
 }
 
 // @alpha
-export function register(params: CustomerRegistrationParams): Promise<CustomerRegisterResponse>;
-
-// @alpha
-export function removeCartItem(itemId: string): Promise<Cart>;
-
-// @alpha
-export function resetPassword(params: CustomerResetPasswordParam): Promise<void>;
-
-// @alpha
-export function setCurrentBillingAddress(billingAddressId: string): Promise<ContextTokenResponse>;
-
-// @alpha (undocumented)
-export function setCurrentCurrency(newCurrencyID: string): Promise<ContextTokenResponse>;
-
-// @alpha (undocumented)
-export function setCurrentLanguage(newLanguageId: string): Promise<ContextTokenResponse>;
-
-// @alpha (undocumented)
-export function setCurrentPaymentMethod(newPaymentMethodId: string): Promise<ContextTokenResponse>;
-
-// @alpha
-export function setCurrentShippingAddress(shippingAddressId: string): Promise<ContextTokenResponse>;
-
-// @alpha (undocumented)
-export function setCurrentShippingMethod(newShippingMethodId: string): Promise<ContextTokenResponse>;
-
-// @alpha
-export function setDefaultCustomerBillingAddress(addressId: string): Promise<string>;
-
-// @alpha
-export function setDefaultCustomerShippingAddress(addressId: string): Promise<string>;
+export function register(params: CustomerRegistrationParams, contextInstance?: ShopwareApiInstance): Promise<CustomerRegisterResponse>;
 
 // @beta
-export function setup(config?: ClientSettings): void;
+export function removeCartItem(itemId: string, contextInstance?: ShopwareApiInstance): Promise<Cart>;
+
+// @alpha
+export function resetPassword(params: CustomerResetPasswordParam, contextInstance?: ShopwareApiInstance): Promise<void>;
+
+// @beta (undocumented)
+export function sendContactForm(params: ContactFormData, contextInstance?: ShopwareApiInstance): Promise<void>;
+
+// @alpha
+export function setCurrentBillingAddress(billingAddressId: string, contextInstance?: ShopwareApiInstance): Promise<ContextTokenResponse>;
 
 // @alpha (undocumented)
-export interface ShopwareParams {
+export function setCurrentCurrency(newCurrencyID: string, contextInstance?: ShopwareApiInstance): Promise<ContextTokenResponse>;
+
+// @alpha (undocumented)
+export function setCurrentLanguage(newLanguageId: string, contextInstance?: ShopwareApiInstance): Promise<ContextTokenResponse>;
+
+// @alpha (undocumented)
+export function setCurrentPaymentMethod(newPaymentMethodId: string, contextInstance?: ShopwareApiInstance): Promise<ContextTokenResponse>;
+
+// @alpha
+export function setCurrentShippingAddress(shippingAddressId: string, contextInstance?: ShopwareApiInstance): Promise<ContextTokenResponse>;
+
+// @alpha (undocumented)
+export function setCurrentShippingMethod(newShippingMethodId: string, contextInstance?: ShopwareApiInstance): Promise<ContextTokenResponse>;
+
+// @alpha
+export function setDefaultCustomerBillingAddress(addressId: string, contextInstance?: ShopwareApiInstance): Promise<string>;
+
+// @alpha
+export function setDefaultCustomerShippingAddress(addressId: string, contextInstance?: ShopwareApiInstance): Promise<string>;
+
+// @beta
+export const setup: (config?: ClientSettings) => void;
+
+// @beta (undocumented)
+export interface ShopwareApiInstance {
     // (undocumented)
-    associations?: ShopwareAssociation;
+    config: ClientSettings;
     // (undocumented)
-    filter?: (NotFilter | MultiFilter | EqualsFilter | EqualsAnyFilter | RangeFilter)[];
+    defaults: AxiosInstance["defaults"];
     // (undocumented)
-    grouping?: Grouping;
+    invoke: {
+        post: AxiosInstance["post"];
+        get: AxiosInstance["get"];
+        put: AxiosInstance["put"];
+        patch: AxiosInstance["patch"];
+        delete: AxiosInstance["delete"];
+    };
     // (undocumented)
-    limit?: number;
+    onConfigChange: (fn: (context: ConfigChangedArgs) => void) => void;
     // (undocumented)
-    manufacturer?: string;
+    setup: (config?: ClientSettings) => void;
     // (undocumented)
-    p?: number;
-    // (undocumented)
-    page?: number;
-    // (undocumented)
-    properties?: string;
-    // (undocumented)
-    sort?: string;
-    // (undocumented)
-    term?: string;
+    update: (config?: ClientSettings) => void;
 }
 
 // @beta
-export function update(config?: ClientSettings): void;
+export const update: (config?: ClientSettings) => void;
 
 // @alpha
-export function updateEmail(params: CustomerUpdateEmailParam): Promise<void>;
+export function updateEmail(params: CustomerUpdateEmailParam, contextInstance?: ShopwareApiInstance): Promise<void>;
 
 // @alpha
-export function updatePassword(params: CustomerUpdatePasswordParam): Promise<void>;
+export function updatePassword(params: CustomerUpdatePasswordParam, contextInstance?: ShopwareApiInstance): Promise<void>;
 
 // @alpha
-export function updateProfile(params: CustomerUpdateProfileParam): Promise<void>;
+export function updateProfile(params: CustomerUpdateProfileParam, contextInstance?: ShopwareApiInstance): Promise<void>;
 
 
 // (No @packageDocumentation comment for this package)

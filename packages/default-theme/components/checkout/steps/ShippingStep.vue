@@ -32,14 +32,35 @@
               </div>
             </div>
           </template>
+          <template #description="{description}">
+            <div class="sf-radio__description shipping__description">
+              <div class="shipping__delivery">
+                <p>{{ description }}</p>
+              </div>
+              <transition name="sf-fade">
+                <div
+                  v-if="activeShippingMethod === shippingMethod.id"
+                  class="shipping__info"
+                >
+                  <SwPluginSlot
+                    :name="`checkout-shiping-method-${shippingMethod.name}`"
+                    :slot-context="shippingMethod"
+                  />
+                </div>
+              </transition>
+            </div>
+          </template>
         </SfRadio>
       </div>
       <div class="form__action">
-        <SwButton class="form__action-button color-secondary desktop-only"
+        <SwButton
+          class="form__action-button color-secondary desktop-only"
+          @click="$emit('retreat')"
           >Go Back to Personal details</SwButton
         >
         <SwButton
           class="sf-button--full-width form__action-button"
+          data-cy="continue-to-payment"
           @click="$emit('proceed')"
           >Continue to payment</SwButton
         >
@@ -63,6 +84,7 @@ import {
   useCart,
 } from "@shopware-pwa/composables"
 import SwButton from "@shopware-pwa/default-theme/components/atoms/SwButton"
+import SwPluginSlot from "sw-plugins/SwPluginSlot"
 
 export default {
   name: "ShippingStep",
@@ -73,11 +95,14 @@ export default {
     SfAlert,
     ShippingAddressGuestForm,
     ShippingAddressUserForm,
+    SwPluginSlot,
   },
-  setup() {
-    const { isGuestOrder, getShippingMethods, shippingMethods } = useCheckout()
-    const { shippingMethod, setShippingMethod } = useSessionContext()
-    const { refreshCart } = useCart()
+  setup(props, { root }) {
+    const { isGuestOrder, getShippingMethods, shippingMethods } = useCheckout(
+      root
+    )
+    const { shippingMethod, setShippingMethod } = useSessionContext(root)
+    const { refreshCart } = useCart(root)
 
     const activeShippingMethod = computed({
       get: () => shippingMethod.value && shippingMethod.value.id,

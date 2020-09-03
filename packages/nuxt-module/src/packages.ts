@@ -1,5 +1,6 @@
 import path from "path";
-import { NuxtModuleOptions, WebpackConfig } from "./interfaces";
+import jetpack from "fs-jetpack";
+import { NuxtModuleOptions } from "./interfaces";
 
 /* istanbul ignore next */
 export function useCorePackages(
@@ -7,16 +8,14 @@ export function useCorePackages(
   corePackages: string[]
 ) {
   const useRawSource = (packageName: string) => {
-    const pkgPath = path.resolve("node_modules/" + packageName);
-    const pkg = require(pkgPath + "/package.json");
+    const pkgPath = path.resolve(path.join("node_modules", packageName));
+    const pkg = jetpack.read(path.join(pkgPath, "package.json"), "json");
 
     if (pkg.module) {
-      moduleObject.extendBuild((config: WebpackConfig) => {
-        config.resolve.alias[pkg.name + "$"] = path.resolve(
-          pkgPath,
-          pkg.module
-        );
-      });
+      moduleObject.options.alias[pkg.name + "$"] = path.resolve(
+        pkgPath,
+        pkg.module
+      );
     }
     moduleObject.options.build = moduleObject.options.build || {};
     moduleObject.options.build.transpile =

@@ -16,15 +16,18 @@ import CmsGenericElement from "sw-cms/CmsGenericElement"
 
 export default {
   name: "CmsBlockImageTextCover",
+
   components: {
     CmsGenericElement,
   },
+
   props: {
     content: {
       type: Object,
       default: () => ({}),
     },
   },
+
   computed: {
     getSlots() {
       return this.content.slots || []
@@ -57,10 +60,27 @@ export default {
     }
   }
 
+  .cms-block-image-text-cover__image {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
   @include for-desktop {
+    align-items: center;
     flex-direction: row;
     justify-content: space-around;
-    align-items: center;
+
+    .cms-block-image-text-cover__image {
+      margin-bottom: 0;
+      margin-right: var(--spacer-sm);
+      margin-top: 0;
+    }
+
+    .cms-block-image-text-cover__text {
+      margin-bottom: 0;
+      margin-left: var(--spacer-sm);
+      margin-top: 0;
+    }
   }
 }
 </style>

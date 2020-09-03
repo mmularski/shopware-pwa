@@ -1,5 +1,10 @@
 <template>
-  <component :is="getComponent" :content="content" :style="slotStyles" />
+  <component
+    :is="getComponent"
+    :content="content"
+    :style="slotStyles"
+    :class="cmsClass"
+  />
 </template>
 
 <script>
@@ -7,15 +12,20 @@ import { getCmsBlockComponent } from "sw-cms/cmsNameMapper"
 
 export default {
   name: "CmsGenericBlock",
+
   props: {
     content: {
       type: Object,
       default: () => ({}),
     },
   },
+
   computed: {
     getComponent() {
       return getCmsBlockComponent(this.content)
+    },
+    cmsClass() {
+      return this.content?.cssClass
     },
     backgroundMediaMode() {
       return this.content.backgroundMediaMode

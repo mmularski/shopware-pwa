@@ -9,3 +9,5 @@ export * from "./navigation";
 export * from "./salutation";
 export * from "./error";
 export * from "./order";
+export * from "./plugins";
+export * from "./debounce";
